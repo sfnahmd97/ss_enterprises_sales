@@ -1,10 +1,35 @@
 import { create } from "zustand";
 import api from "../lib/axios";
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  relation_id: number;
+  model: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Token {
+  accessToken: object;
+  plainTextToken: string;
+}
+
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  response: {
+    user: User;
+    token: Token;
+  };
+}
+
 interface AuthState {
-  user: any | null;
+  user: User | null;
   token: string | null;
-  login: (email: string, password: string,) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   isAuthenticated: () => boolean;
 }
@@ -16,30 +41,31 @@ export const useAuthStore = create<AuthState>((set, get) => {
   return {
     user: savedUser ? JSON.parse(savedUser) : null,
     token: savedToken,
-    
 
     isAuthenticated: () => {
       const state = get();
       return !!state.token && !!state.user;
     },
 
-    login: async (email, password, ) => {
+    login: async (email, password) => {
       try {
-        const res = await api.post("/login", { email, password });
+        // ✅ Explicitly type the Axios response
+        const res = await api.post<LoginResponse>("/login/sales", { email, password });
 
-        const { user, token } = (res.data as { response: { user: any; token: { plainTextToken: string } } }).response;
+        const { success, message, response } = res.data;
+        const { user, token } = response;
 
         const plainToken = token.plainTextToken;
 
         set({ token: plainToken, user });
+        localStorage.setItem("auth_token", plainToken);
+        localStorage.setItem("auth_user", JSON.stringify(user));
 
-          localStorage.setItem("auth_token", plainToken);
-          localStorage.setItem("auth_user", JSON.stringify(user));
-
-        return true;
-      } catch (error) {
-        console.error("Login failed", error);
-        return false;
+        return { success, message };
+      } catch (error: any) {
+        const message =
+          error.response?.data?.message || "Login failed, please try again.";
+        return { success: false, message };
       }
     },
 

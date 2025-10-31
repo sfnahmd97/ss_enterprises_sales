@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { User, FileText, Plus } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function OrderForm() {
   const [formData, setFormData] = useState({
@@ -77,9 +78,8 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
     // Check if there are any errors
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      alert(
-        "Please fill in all required fields: Design Type, Design Number, Finishing, Size, and Nos"
-      );
+      
+      toast.error("Please fill in all required fields: Design Type, Design Number, Finishing, Size, and Nos");
       return;
     }
 
@@ -108,11 +108,11 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* 1. Customer Details Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
           <div className="flex items-center gap-2 mb-6">
             <User className="w-5 h-5" />
             <h2 className="text-lg font-semibold">Order Form</h2>
@@ -198,7 +198,7 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
         </div>
 
         {/* 2. Design Details Input Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
           <div className="flex items-center gap-2 mb-6">
             <FileText className="w-5 h-5" />
             <h2 className="text-lg font-semibold">
@@ -302,14 +302,8 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
               <div className="flex items-center gap-4">
                 {/* PANEL LABEL */}
                 <label
-                  className={`w-20 text-sm ${
-                    errors.size || errors.nos ? "text-red-500" : "text-gray-600"
-                  }`}
-                >
+                  className="w-20 text-sm text-gray-600">
                   Panel :{" "}
-                  {(errors.size || errors.nos) && (
-                    <span className="text-red-500">*</span>
-                  )}
                 </label>
 
                 {/* SIZE + NOS IN A ROW */}

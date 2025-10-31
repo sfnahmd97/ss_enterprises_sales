@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
@@ -13,13 +14,15 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    const success = await login(email, password);
+
+    const { success, message } = await login(email, password);
     setLoading(false);
 
     if (success) {
+      toast.success(message || "Login successful");
       navigate("/dashboard");
     } else {
-      alert("Invalid credentials, please try again.");
+      toast.error(message || "Invalid credentials, please try again.");
     }
   };
 
@@ -32,7 +35,9 @@ export default function LoginPage() {
             alt="Logo"
             className="w-16 h-16 object-contain mb-3"
           />
-          <h1 className="text-2xl font-semibold text-gray-800">SS ENTERPRISES</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            SS ENTERPRISES
+          </h1>
           <p className="text-gray-500 text-sm mt-1">Sign in to continue</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
