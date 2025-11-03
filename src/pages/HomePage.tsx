@@ -1,8 +1,10 @@
 "use client";
-import React from "react";
+import {useEffect, useState} from "react";
 import StatCard from "../components/StateCard";
 import { Users, ShoppingCart, Clock, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import api from "../lib/axios";
+
 
 const Home: React.FC = () => {
   const pendingOrders = [
@@ -13,8 +15,24 @@ const Home: React.FC = () => {
     { id: "ORD-1019", customer: "David Johnson", date: "2025-10-23", status: "Pending" },
   ];
 
+  const [customer_count, setCustomerCount] = useState(0);
+
+  const fetchDashboardData = async () => {
+        try {
+          const res = await api.get(`/sales/get-dashboard-data`);
+          const data = (res.data as { data: any }).data;
+          setCustomerCount(data.customers_count);
+        } catch {
+          console.error("Failed to load user data");
+        }
+      };
+
+      useEffect(()=>{
+fetchDashboardData();
+      },[]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 p-8">
+    <div className="bg-gradient-to-br from-blue-50 via-white to-blue-100 p-8">
       {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
@@ -37,17 +55,19 @@ const Home: React.FC = () => {
 
       {/* Stat Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full mb-12">
+        <Link to="/customers/list">
         <StatCard
           title="Customers"
-          value="3,897"
+          value={customer_count}
           change="+3.3%"
           positive={true}
           icon={Users}
           color="blue"
         />
+        </Link>
         <StatCard
           title="Total Orders"
-          value="35,084"
+          value={0}
           change="+5.1%"
           positive={true}
           icon={ShoppingCart}
@@ -55,7 +75,7 @@ const Home: React.FC = () => {
         />
         <StatCard
           title="Pending Orders"
-          value="1,245"
+          value={0}
           change="-1.2%"
           positive={false}
           icon={Clock}

@@ -25,7 +25,7 @@ export default function changePassword() {
 
   const handleSubmit = async (values: any, { setErrors, resetForm }: any) => {
     try {
-      const res = await api.post("/user/change-password", values);
+      const res = await api.post("/sales/user/change-password", values);
 
       const success = (res.data as { success: any[] }).success;
       const message = (res.data as { message: string }).message;

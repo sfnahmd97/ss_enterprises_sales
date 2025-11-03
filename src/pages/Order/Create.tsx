@@ -10,18 +10,6 @@ export default function OrderForm() {
     deliveryDate: "",
   });
 
-//   const [currentDesign, setCurrentDesign] = useState({
-//     designType: "",
-//     designNo: "",
-//     finishing: "",
-//     panel: "",
-//     size: "",
-//     nos: "",
-//     aSection: { small: "", big: "", large: "" },
-//     frame: { small: "", big: "", large: "" },
-//   });
-
-
 interface OrderForm {
   id?: number;
   designType: string;
@@ -207,7 +195,7 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
           </div>
 
           {/* Design Type, Design No, Finishing */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-4 gap-4 mb-4">
             <div className="relative">
               <select
                 value={currentDesign.designType}
@@ -239,35 +227,6 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
             <div className="relative">
               <select
-                value={currentDesign.designNo}
-                onChange={(e) => {
-                  setCurrentDesign({
-                    ...currentDesign,
-                    designNo: e.target.value,
-                  });
-                  setErrors({ ...errors, designNo: false });
-                }}
-                className={`w-full px-4 py-3 border ${
-                  errors.designNo ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white`}
-              >
-                <option value="">Select Type</option>
-                <option value="DW-001">DW-001</option>
-                <option value="DW-002">DW-002</option>
-                <option value="DW-003">DW-003</option>
-              </select>
-              <label
-                className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
-                  errors.designNo ? "text-red-500" : "text-gray-600"
-                }`}
-              >
-                Design No.{" "}
-                {errors.designNo && <span className="text-red-500">*</span>}
-              </label>
-            </div>
-
-            <div className="relative">
-              <select
                 value={currentDesign.finishing}
                 onChange={(e) => {
                   setCurrentDesign({
@@ -294,6 +253,66 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
                 {errors.finishing && <span className="text-red-500">*</span>}
               </label>
             </div>
+
+            <div className="relative">
+              <select
+                value={currentDesign.designType}
+                onChange={(e) => {
+                  setCurrentDesign({
+                    ...currentDesign,
+                    designType: e.target.value,
+                  });
+                  setErrors({ ...errors, designType: false });
+                }}
+                className={`w-full px-4 py-3 border ${
+                  errors.designType ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white peer`}
+              >
+                <option value="">Select Size</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+              </select>
+              <label
+                className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
+                  errors.designType ? "text-red-500" : "text-gray-600"
+                }`}
+              >
+                Panel Size{" "}
+                {errors.designType && <span className="text-red-500">*</span>}
+              </label>
+            </div>
+
+            
+
+            <div className="relative">
+              <select
+                value={currentDesign.designNo}
+                onChange={(e) => {
+                  setCurrentDesign({
+                    ...currentDesign,
+                    designNo: e.target.value,
+                  });
+                  setErrors({ ...errors, designNo: false });
+                }}
+                className={`w-full px-4 py-3 border ${
+                  errors.designNo ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white`}
+              >
+                <option value="">Select Type</option>
+                <option value="DW-001">DW-001</option>
+                <option value="DW-002">DW-002</option>
+                <option value="DW-003">DW-003</option>
+              </select>
+              <label
+                className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
+                  errors.designNo ? "text-red-500" : "text-gray-600"
+                }`}
+              >
+                Design No.{" "}
+                {errors.designNo && <span className="text-red-500">*</span>}
+              </label>
+            </div>
           </div>
 
           {/* Panel with Size and Nos */}
@@ -308,31 +327,7 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
                 {/* SIZE + NOS IN A ROW */}
                 <div className="grid grid-cols-2 gap-4 w-full">
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={currentDesign.size}
-                      onChange={(e) => {
-                        setCurrentDesign({
-                          ...currentDesign,
-                          size: e.target.value,
-                        });
-                        setErrors({ ...errors, size: false });
-                      }}
-                      placeholder="0"
-                      className={`w-full px-3 py-2 border ${
-                        errors.size ? "border-red-500" : "border-gray-300"
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                    />
-                    <label
-                      className={`absolute left-3 -top-2.5 bg-white px-1 text-xs ${
-                        errors.size ? "text-red-500" : "text-gray-600"
-                      }`}
-                    >
-                      Size{" "}
-                      {errors.size && <span className="text-red-500">*</span>}
-                    </label>
-                  </div>
+                  
 
                   <div className="relative">
                     <input

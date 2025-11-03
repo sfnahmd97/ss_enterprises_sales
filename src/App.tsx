@@ -8,19 +8,13 @@ import HomePage from "./pages/HomePage";
 import ReportsPage from "./pages/ReportPage";
 import SettingsPage from "./pages/Settings";
 
-// Masters
-
-
-
-import ListFinishing from "./Masters/Finishing/List";
-import AddFinishing from "./Masters/Finishing/Add";
-import EditFinishing from "./Masters/Finishing/Edit";
-
 
 import EditProfile from "./Profile/EditProfile";
 import ChangePassword from "./Profile/changePassword";
 
 import CreateOrder from "./pages/Order/Create";
+import CustomersList from "./pages/Customer/List";
+
 
 export default function App() {
   return (
@@ -46,21 +40,14 @@ export default function App() {
 
         {/* Master Group */}
         <Route
-          path="/master/*"
+          path="/customers/*"
           element={
             <ProtectedRoute>
               <Layout>
                 <Routes>
                   
-
                   {/* Finishing */}
-                  <Route path="finishing" element={<ListFinishing />} />
-                  <Route path="finishing/add" element={<AddFinishing />} />
-                  <Route path="finishing/edit/:id" element={<EditFinishing />}/>
-
-                  
-
-
+                  <Route path="list" element={<CustomersList />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

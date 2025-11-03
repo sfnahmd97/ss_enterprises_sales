@@ -31,11 +31,12 @@ export default function Header() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await api.get(`/user`);
+        const res = await api.get(`/sales/user`);
         const data = (res.data as { data: any }).data;
         setUser({
           name: data.name,
           email: data.email,
+          designation_label: data.designation_label,
         });
       } catch {
         console.error("Failed to load user data");
@@ -74,7 +75,7 @@ export default function Header() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await api.post("/user/log-out");
+          const res = await api.post("/sales/user/log-out");
           const success = (res.data as { success: boolean }).success;
 
           if (success) {
@@ -225,7 +226,7 @@ export default function Header() {
                 <p className="text-sm font-semibold text-gray-800">
                   Hello, <span className="capitalize">{user?.name || "Guest"}</span>!
                 </p>
-                <p className="text-xs text-gray-500">{user?.email || "No email"}</p>
+                <p className="text-xs text-gray-500">{user?.designation_label || "No email"}</p>
               </div>
 
               <div className="flex flex-col p-2">
