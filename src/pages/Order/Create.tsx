@@ -1,8 +1,130 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User, FileText, Plus } from "lucide-react";
 import toast from "react-hot-toast";
+import Select from "react-select";
+import api from "../../lib/axios";
+import type {
+  DoorPartSize,
+  Finishing,
+  OrderForm,
+  Customer,
+  DesignType,
+} from "../../interfaces/common";
 
 export default function OrderForm() {
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [designTypes, setDesignTypes] = useState<DesignType[]>([]);
+  const [finishings, setFinishing] = useState<Finishing[]>([]);
+  const [panelSizes, setPanelSizes] = useState<DoorPartSize[]>([]);
+  const [aSectionSizes, setASectionSizes] = useState<DoorPartSize[]>([]);
+  const [frameSizes, setFrameSizes] = useState<DoorPartSize[]>([]);
+  const [designCodes, setDesignCodes] = useState<{ id: number; design_code: string }[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+
+  const fetchDesignTypes = async () => {
+    try {
+      const res = await api.get("sales/get-design-types");
+      const data = (res.data as { data: any }).data;
+      setDesignTypes(data);
+    } catch (error) {
+      console.error("Failed to load design types", error);
+    }
+  };
+
+  const fetchFinishing = async () => {
+    try {
+      const res = await api.get("sales/get-finishing");
+      const data = (res.data as { data: any }).data;
+
+      setFinishing(data);
+    } catch (error) {
+      console.error("Failed to load finishing", error);
+    }
+  };
+
+  const fetchPanelSizes = async () => {
+    try {
+      const res = await api.get("sales/get-door-part-sizes/panel");
+      const data = (res.data as { data: any }).data;
+      setPanelSizes(data);
+    } catch (error) {
+      console.error("Failed to load Panel Sizes", error);
+    }
+  };
+
+  const fetchASectionSizes = async () => {
+    try {
+      const res = await api.get("sales/get-door-part-sizes/a_section");
+      const data = (res.data as { data: any }).data;
+      setASectionSizes(data);
+    } catch (error) {
+      console.error("Failed to load A Section Sizes", error);
+    }
+  };
+
+  const fetchFrameSizes = async () => {
+    try {
+      const res = await api.get("sales/get-door-part-sizes/frame");
+      const data = (res.data as { data: any }).data;
+      setFrameSizes(data);
+    } catch (error) {
+      console.error("Failed to load Frame Sizes", error);
+    }
+  };
+
+  const fetchDesignCodes = async (designTypeID?: string, finishingID?: string) => {
+    try {
+      const url = `sales/get-designs/${designTypeID || ""}/${
+        finishingID || ""
+      }`;
+      const res = await api.get(url);
+      const data = (res.data as { data: any[] }).data;
+      setDesignCodes(data);
+    } catch (error) {
+      console.error("Failed to load designs", error);
+      setDesignCodes([]);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const res = await api.get("sales/get-customers");
+      const data = (res.data as { data: any }).data;
+
+      const formattedCustomers = data.map((customer: any) => ({
+        value: customer.id,
+        label: customer.name,
+      }));
+
+      setCustomers(formattedCustomers);
+    } catch (error) {
+      console.error("Failed to load Customers", error);
+    }
+  };
+
+  useEffect(() => {
+  const loadAllData = async () => {
+    try {
+      await Promise.all([
+        fetchCustomers(),
+        fetchDesignTypes(),
+        fetchFinishing(),
+        fetchPanelSizes(),
+        fetchASectionSizes(),
+        fetchFrameSizes(),
+      ]);
+    } catch (error) {
+      console.error("Error loading data", error);
+    } finally {
+      setLoading(false); // hide loader once all data fetched
+    }
+  };
+
+  loadAllData();
+}, []);
+
   const [formData, setFormData] = useState({
     customerName: "",
     place: "",
@@ -10,47 +132,29 @@ export default function OrderForm() {
     deliveryDate: "",
   });
 
-interface OrderForm {
-  id?: number;
-  designType: string;
-  designNo: string;
-  finishing: string;
-  panel?: string;
-  size: string;
-  nos: string;
-  aSection: {
-    small: string;
-    big: string;
-    large: string;
-  };
-  frame: {
-    small: string;
-    big: string;
-    large: string;
-  };
-}
+  const [currentDesign, setCurrentDesign] = useState<OrderForm>({
+    id: 0,
+    designType: "",
+    panelSize: "",
+    designNo: "",
+    finishing: "",
+    panel: "",
+    size: "",
+    nos: "",
+    aSection: {},
+    frame: {},
+  });
 
-const [currentDesign, setCurrentDesign] = useState<OrderForm>({
-  id: 0,
-  designType: "",
-  designNo: "",
-  finishing: "",
-  panel: "",
-  size: "",
-  nos: "",
-  aSection: { small: "", big: "", large: "" },
-  frame: { small: "", big: "", large: "" },
-});
+  interface Errors {
+    designType?: boolean;
+    designNo?: boolean;
+    finishing?: boolean;
+    panelSize?: boolean;
+    size?: boolean;
+    nos?: boolean;
+  }
 
-interface Errors {
-  designType?: boolean;
-  designNo?: boolean;
-  finishing?: boolean;
-  size?: boolean;
-  nos?: boolean;
-}
-
-const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
+  const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
   const [errors, setErrors] = useState<Errors>({});
 
@@ -66,8 +170,10 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
     // Check if there are any errors
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      
-      toast.error("Please fill in all required fields: Design Type, Design Number, Finishing, Size, and Nos");
+
+      toast.error(
+        "Please fill in all required fields: Design Type, Design Number, Finishing, Size, and Nos"
+      );
       return;
     }
 
@@ -80,14 +186,16 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
     // Reset current design
     setCurrentDesign({
+      id: 0,
       designType: "",
+      panelSize: "",
       designNo: "",
       finishing: "",
       panel: "",
       size: "",
       nos: "",
-      aSection: { small: "", big: "", large: "" },
-      frame: { small: "", big: "", large: "" },
+      aSection: {},
+      frame: {},
     });
   };
 
@@ -95,8 +203,21 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
     console.log("Form submitted:", { formData, savedDesigns });
   };
 
+
+  if (loading) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
+    <div className="flex items-center justify-center h-screen bg-white">
+      <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+    </div>
+  );
+}
+
+  return (
+    <div
+  className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 transition-opacity duration-500 ${
+    loading ? "opacity-0" : "opacity-100"
+  }`}
+>
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* 1. Customer Details Section */}
@@ -108,19 +229,35 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
           <div className="grid grid-cols-2 gap-6">
             <div className="relative">
-              <input
-                type="text"
-                id="customerName"
-                value={formData.customerName}
-                onChange={(e) =>
-                  setFormData({ ...formData, customerName: e.target.value })
+              <Select
+                options={customers}
+                value={
+                  customers.find((opt) => opt.name === formData.customerName) ||
+                  null
                 }
-                placeholder="Enter the name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
+                onChange={(selectedOption) =>
+                  setFormData({
+                    ...formData,
+                    customerName: selectedOption ? selectedOption.name : "",
+                  })
+                }
+                placeholder="Select a Customer"
+                isClearable
+                className="w-full"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    padding: "0.375rem 0",
+                    borderColor: "#d1d5db",
+                    "&:hover": {
+                      borderColor: "#d1d5db",
+                    },
+                  }),
+                }}
               />
               <label
                 htmlFor="customerName"
-                className="absolute left-3 -top-2.5 bg-white px-1 text-sm text-gray-600 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-600"
+                className="absolute left-3 -top-2.5 bg-white px-1 text-sm text-gray-600"
               >
                 Customer Name
               </label>
@@ -166,18 +303,17 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
             <div className="relative">
               <input
-                type="text"
+                type="date"
                 id="deliveryDate"
                 value={formData.deliveryDate}
                 onChange={(e) =>
                   setFormData({ ...formData, deliveryDate: e.target.value })
                 }
-                placeholder="Enter the Date"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <label
                 htmlFor="deliveryDate"
-                className="absolute left-3 -top-2.5 bg-white px-1 text-sm text-gray-600 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-600"
+                className="absolute left-3 -top-2.5 bg-white px-1 text-sm text-gray-600"
               >
                 Delivery Date
               </label>
@@ -200,20 +336,28 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
               <select
                 value={currentDesign.designType}
                 onChange={(e) => {
+                  const selectedType = e.target.value;
                   setCurrentDesign({
                     ...currentDesign,
-                    designType: e.target.value,
+                    designType: selectedType,
                   });
                   setErrors({ ...errors, designType: false });
+
+                  // Fetch designs if finishing is already selected
+                  if (selectedType || currentDesign.finishing) {
+                    fetchDesignCodes(selectedType, currentDesign.finishing);
+                  }
                 }}
                 className={`w-full px-4 py-3 border ${
-                  errors.designType ? "border-red-500" : "border-gray-300"
+                  errors.designNo ? "border-red-500" : "border-gray-300"
                 } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white peer`}
               >
                 <option value="">Select Type</option>
-                <option value="XYZ">XYZ</option>
-                <option value="ABC">ABC</option>
-                <option value="DEF">DEF</option>
+                {designTypes.map((val) => (
+                  <option key={val.id} value={val.id}>
+                    {val.title}
+                  </option>
+                ))}
               </select>
               <label
                 className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
@@ -229,20 +373,28 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
               <select
                 value={currentDesign.finishing}
                 onChange={(e) => {
+                  const selectedFinish = e.target.value;
                   setCurrentDesign({
                     ...currentDesign,
-                    finishing: e.target.value,
+                    finishing: selectedFinish,
                   });
                   setErrors({ ...errors, finishing: false });
+
+                  // Fetch designs if design type is already selected
+                  if (selectedFinish || currentDesign.designType) {
+                    fetchDesignCodes(currentDesign.designType, selectedFinish);
+                  }
                 }}
                 className={`w-full px-4 py-3 border ${
-                  errors.finishing ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white`}
+                  errors.designNo ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white peer`}
               >
                 <option value="">Select Finishing</option>
-                <option value="Glossy">Glossy</option>
-                <option value="Matte">Matte</option>
-                <option value="Satin">Satin</option>
+                {finishings.map((val) => (
+                  <option key={val.id} value={val.id}>
+                    {val.title}
+                  </option>
+                ))}
               </select>
               <label
                 className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
@@ -256,34 +408,34 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
             <div className="relative">
               <select
-                value={currentDesign.designType}
+                value={currentDesign.panelSize}
                 onChange={(e) => {
                   setCurrentDesign({
                     ...currentDesign,
-                    designType: e.target.value,
+                    panelSize: e.target.value,
                   });
-                  setErrors({ ...errors, designType: false });
+                  setErrors({ ...errors, panelSize: false });
                 }}
                 className={`w-full px-4 py-3 border ${
-                  errors.designType ? "border-red-500" : "border-gray-300"
+                  errors.panelSize ? "border-red-500" : "border-gray-300"
                 } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white peer`}
               >
                 <option value="">Select Size</option>
-                <option value="20">20</option>
-                <option value="25">25</option>
-                <option value="26">26</option>
+                {panelSizes.map((val) => (
+                  <option key={val.id} value={val.id}>
+                    {val.size}
+                  </option>
+                ))}
               </select>
               <label
                 className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
-                  errors.designType ? "text-red-500" : "text-gray-600"
+                  errors.panelSize ? "text-red-500" : "text-gray-600"
                 }`}
               >
                 Panel Size{" "}
-                {errors.designType && <span className="text-red-500">*</span>}
+                {errors.panelSize && <span className="text-red-500">*</span>}
               </label>
             </div>
-
-            
 
             <div className="relative">
               <select
@@ -297,12 +449,14 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
                 }}
                 className={`w-full px-4 py-3 border ${
                   errors.designNo ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white`}
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white peer`}
               >
-                <option value="">Select Type</option>
-                <option value="DW-001">DW-001</option>
-                <option value="DW-002">DW-002</option>
-                <option value="DW-003">DW-003</option>
+                <option value="">Select Design</option>
+                {designCodes.map((val) => (
+                  <option key={val.id} value={val.design_code}>
+                    {val.design_code}
+                  </option>
+                ))}
               </select>
               <label
                 className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
@@ -317,22 +471,27 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
 
           {/* Panel with Size and Nos */}
           <div className="mb-6">
-            <div className="relative rounded-md p-4">
+            <div className="relative p-4">
               <div className="flex items-center gap-4">
                 {/* PANEL LABEL */}
-                <label
-                  className="w-20 text-sm text-gray-600">
-                  Panel :{" "}
-                </label>
+                <label className="w-28 text-sm text-gray-600">Panel : </label>
 
                 {/* SIZE + NOS IN A ROW */}
                 <div className="grid grid-cols-2 gap-4 w-full">
-                  
-
                   <div className="relative">
                     <input
                       type="number"
+                      min={0}
+                      step={1}
                       value={currentDesign.nos}
+                      onKeyDown={(e) => {
+                        if (["e", "E", "+", "-", "."].includes(e.key))
+                          e.preventDefault();
+                      }}
+                      onPaste={(e) => {
+                        const paste = e.clipboardData.getData("text");
+                        if (/[^0-9]/.test(paste)) e.preventDefault();
+                      }}
                       onChange={(e) => {
                         setCurrentDesign({
                           ...currentDesign,
@@ -369,69 +528,48 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
                 </label>
 
                 {/* FIELDS IN SAME ROW */}
-                <div className="grid grid-cols-3 gap-4 w-full">
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={currentDesign.aSection.small}
-                      onChange={(e) =>
-                        setCurrentDesign({
-                          ...currentDesign,
-                          aSection: {
-                            ...currentDesign.aSection,
-                            small: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
-                      Small
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={currentDesign.aSection.big}
-                      onChange={(e) =>
-                        setCurrentDesign({
-                          ...currentDesign,
-                          aSection: {
-                            ...currentDesign.aSection,
-                            big: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
-                      Big
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={currentDesign.aSection.large}
-                      onChange={(e) =>
-                        setCurrentDesign({
-                          ...currentDesign,
-                          aSection: {
-                            ...currentDesign.aSection,
-                            large: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
-                      Large
-                    </label>
-                  </div>
+                <div
+                  className="grid gap-4 w-full"
+                  style={{
+                    gridTemplateColumns: `repeat(${aSectionSizes.length}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {aSectionSizes.map((val) => {
+                    const id = Number(val.id); // ✅ ensures numeric key
+                    return (
+                      <div key={id} className="relative">
+                        <input
+                          type="number"
+                          name={`a_section${id}`}
+                          min={0}
+                          step={1}
+                          value={currentDesign.aSection[id] || ""}
+                          onKeyDown={(e) => {
+                            if (["e", "E", "+", "-", "."].includes(e.key))
+                              e.preventDefault();
+                          }}
+                          onPaste={(e) => {
+                            const paste = e.clipboardData.getData("text");
+                            if (/[^0-9]/.test(paste)) e.preventDefault();
+                          }}
+                          onChange={(e) =>
+                            setCurrentDesign((prev) => ({
+                              ...prev,
+                              aSection: {
+                                ...prev.aSection,
+                                [id]: e.target.value,
+                              },
+                            }))
+                          }
+                          placeholder="0"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
+                          {val.size}
+                        </label>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -445,69 +583,48 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
                 <label className="w-28 text-sm text-gray-600">Frame :</label>
 
                 {/* FIELDS IN SAME ROW */}
-                <div className="grid grid-cols-3 gap-4 w-full">
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={currentDesign.frame.small}
-                      onChange={(e) =>
-                        setCurrentDesign({
-                          ...currentDesign,
-                          frame: {
-                            ...currentDesign.frame,
-                            small: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
-                      Small
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={currentDesign.frame.big}
-                      onChange={(e) =>
-                        setCurrentDesign({
-                          ...currentDesign,
-                          frame: {
-                            ...currentDesign.frame,
-                            big: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
-                      Big
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={currentDesign.frame.large}
-                      onChange={(e) =>
-                        setCurrentDesign({
-                          ...currentDesign,
-                          frame: {
-                            ...currentDesign.frame,
-                            large: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
-                      Large
-                    </label>
-                  </div>
+                <div
+                  className="grid gap-4 w-full"
+                  style={{
+                    gridTemplateColumns: `repeat(${frameSizes.length}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {frameSizes.map((val) => {
+                    const id = Number(val.id);
+                    return (
+                      <div key={id} className="relative">
+                        <input
+                          type="number"
+                          name={`frame${id}`}
+                          min={0}
+                          step={1}
+                          value={currentDesign.frame[id] || ""}
+                          onKeyDown={(e) => {
+                            if (["e", "E", "+", "-", "."].includes(e.key))
+                              e.preventDefault();
+                          }}
+                          onPaste={(e) => {
+                            const paste = e.clipboardData.getData("text");
+                            if (/[^0-9]/.test(paste)) e.preventDefault();
+                          }}
+                          onChange={(e) =>
+                            setCurrentDesign((prev) => ({
+                              ...prev,
+                              frame: {
+                                ...prev.frame,
+                                [id]: e.target.value,
+                              },
+                            }))
+                          }
+                          placeholder="0"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-600">
+                          {val.size}
+                        </label>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -525,134 +642,90 @@ const [savedDesigns, setSavedDesigns] = useState<OrderForm[]>([]);
         </div>
 
         {/* 3. Saved Designs Display Section (Tabular View) */}
-        {savedDesigns.map((design) => (
-          <div key={design.id} className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                <h2 className="text-lg font-semibold">
-                  Design Details - SL - 0{design.id}
-                </h2>
-              </div>
-              <button className="text-sm text-gray-600 flex items-center gap-1 hover:text-gray-800">
-                <span className="text-lg">✎</span> Edit
-              </button>
-            </div>
+        {/* Saved Designs Display Section (Dynamic View) */}
+{savedDesigns.map((design) => (
+  <div key={design.id} className="bg-white rounded-lg shadow-sm p-6">
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2">
+        <FileText className="w-5 h-5" />
+        <h2 className="text-lg font-semibold">
+          Design Details - SL - 0{design.id}
+        </h2>
+      </div>
+      <button className="text-sm text-gray-600 flex items-center gap-1 hover:text-gray-800">
+        <span className="text-lg">✎</span> Edit
+      </button>
+    </div>
 
-            <div className="space-y-3 text-sm">
-              {/* Row 1 */}
-              <div className="grid grid-cols-4 gap-6">
-                <div>
-                  <span className="text-gray-600">Design Type :</span>
-                  <span className="ml-2 font-medium">
-                    {design.designType || "N/A"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Panel :</span>
-                  <span className="ml-2 font-medium">
-                    {design.panel || "0"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Size</span>
-                  <span className="ml-2 font-medium">{design.size || "0"}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Nos</span>
-                  <span className="ml-2 font-medium">{design.nos || "0"}</span>
-                </div>
-              </div>
+    <div className="space-y-3 text-sm">
+      {/* Row 1: Basic Design Info */}
+      <div className="grid grid-cols-4 gap-6">
+        <div>
+          <span className="text-gray-600">Design Type:</span>
+          <span className="ml-2 font-medium">{design.designType || "N/A"}</span>
+        </div>
+        <div>
+          <span className="text-gray-600">Panel Size:</span>
+          <span className="ml-2 font-medium">{design.panelSize || "N/A"}</span>
+        </div>
+        <div>
+          <span className="text-gray-600">Nos:</span>
+          <span className="ml-2 font-medium">{design.nos || "0"}</span>
+        </div>
+        <div>
+          <span className="text-gray-600">Finishing:</span>
+          <span className="ml-2 font-medium">{design.finishing || "N/A"}</span>
+        </div>
+      </div>
 
-              {/* Row 2 */}
-              <div className="grid grid-cols-4 gap-6">
-                <div>
-                  <span className="text-gray-600">Design No. :</span>
-                  <span className="ml-2 font-medium">
-                    {design.designNo || "N/A"}
-                  </span>
-                </div>
-                <div></div>
-                <div>
-                  <span className="text-gray-600">Small</span>
-                  <span className="ml-2 font-medium">
-                    {design.aSection.small || "0"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Big</span>
-                  <span className="ml-2 font-medium">
-                    {design.aSection.big || "0"}
-                  </span>
-                </div>
-              </div>
+      {/* Row 2: Design & A Section */}
+      <div className="grid grid-cols-1 gap-2">
+        <div>
+          <span className="text-gray-600">Design No.:</span>
+          <span className="ml-2 font-medium">{design.designNo || "N/A"}</span>
+        </div>
 
-              {/* Row 3 */}
-              <div className="grid grid-cols-4 gap-6">
-                <div>
-                  <span className="text-gray-600">Finishing :</span>
-                  <span className="ml-2 font-medium">
-                    {design.finishing || "N/A"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">A section :</span>
-                  <span className="ml-2 font-medium">
-                    {design.aSection.small || "0"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Big</span>
-                  <span className="ml-2 font-medium">
-                    {design.frame.big || "0"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Large</span>
-                  <span className="ml-2 font-medium">
-                    {design.aSection.large || "0"}
-                  </span>
-                </div>
+        {/* A Section Dynamic Values */}
+        <div>
+          <span className="text-gray-600">A Section:</span>
+          <div className="grid gap-3 mt-2"
+               style={{
+                 gridTemplateColumns: `repeat(${aSectionSizes.length}, minmax(0, 1fr))`
+               }}>
+            {aSectionSizes.map((size) => (
+              
+              <div key={size.id} className="flex flex-col items-center text-center">
+                <span className="text-gray-600 text-xs">{size.size}</span>
+                <span className="font-medium">
+                  {design.aSection[size.id as number] || "0"}
+                </span>
               </div>
-
-              {/* Row 4 */}
-              <div className="grid grid-cols-4 gap-6">
-                <div></div>
-                <div></div>
-                <div>
-                  <span className="text-gray-600">Frame :</span>
-                  <span className="ml-2 font-medium">
-                    {design.frame.small || "0"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Small</span>
-                  <span className="ml-2 font-medium">
-                    {design.frame.small || "0"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Row 5 */}
-              <div className="grid grid-cols-4 gap-6">
-                <div></div>
-                <div></div>
-                <div>
-                  <span className="text-gray-600">Large</span>
-                  <span className="ml-2 font-medium">
-                    {design.frame.large || "0"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Large</span>
-                  <span className="ml-2 font-medium">
-                    {design.frame.large || "0"}
-                  </span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
+      </div>
+
+      {/* Row 3: Frame Dynamic Values */}
+      <div>
+        <span className="text-gray-600">Frame:</span>
+        <div className="grid gap-3 mt-2"
+             style={{
+               gridTemplateColumns: `repeat(${frameSizes.length}, minmax(0, 1fr))`
+             }}>
+          {frameSizes.map((size) => (
+            <div key={size.id} className="flex flex-col items-center text-center">
+              <span className="text-gray-600 text-xs">{size.size}</span>
+              <span className="font-medium">
+                {design.frame[size.id as number] || "0"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+))}
+
 
         {/* Submit Button */}
         <div className="flex justify-center pt-4">

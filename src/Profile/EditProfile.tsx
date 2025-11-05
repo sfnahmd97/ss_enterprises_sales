@@ -12,7 +12,7 @@ export default function EditProfile() {
   const [initialValues, setInitialValues] = useState<UserData | null>(null);
 
   useEffect(() => {
-    api.get(`/user/edit-profile`).then((res) => {
+    api.get(`/sales/user/edit-profile`).then((res) => {
         const data = (res.data as { data: any }).data;
         setInitialValues({ ...data });
       })
@@ -29,7 +29,7 @@ export default function EditProfile() {
     { setErrors }: FormikHelpers<UserData>
   ) => {
     try {
-      const res = await api.post(`/user/update-profile`, values);
+      const res = await api.post(`sales/user/update-profile`, values);
 
       const success = (res.data as { success: any[] }).success;
       const message = (res.data as { message: string }).message;

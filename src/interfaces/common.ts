@@ -11,6 +11,26 @@ export interface ListApiResponse<T> {
   meta: PaginationMeta;
 }
 
+export interface Customer {
+  id?: number;
+  name: string;
+}
+
+ export interface DesignType {
+  id?: number;
+  title: string;
+  short: string;
+  status?: boolean;
+}
+
+
+export interface Finishing {
+  id?: number;
+  title: string;
+  short: string;
+  status?: boolean;
+}
+
 export interface UserData {
   name: string;
   email: string;
@@ -38,5 +58,25 @@ export interface UserData {
   key: string;
   name: string;
   state?: string;
+}
+
+interface SectionValues {
+  [key: string]: string; // or Record<string, string>
+}
+export interface OrderForm {
+    id?: number;
+    designType: string;
+    panelSize: string;
+    designNo: string;
+    finishing: string;
+    panel?: string;
+    size: string;
+    nos: string;
+    aSection: SectionValues;
+    frame: SectionValues;
+  }
+ export interface DoorPartSize {
+  id?: number;
+  size: string;
 }
 

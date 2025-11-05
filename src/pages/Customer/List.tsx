@@ -30,7 +30,7 @@ export default function Main() {
 
       const params: any = { page, per_page: perPage };
       if (search) params.search_key = search;
-      const res = await api.get<ListApiResponse<any[]>>(`/sales/get-customers`, {
+      const res = await api.get<ListApiResponse<any[]>>(`/sales/get-customers-list`, {
         params,
       });
 
