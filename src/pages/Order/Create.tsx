@@ -7,12 +7,17 @@ import type {
   DoorPartSize,
   Finishing,
   OrderForm,
-  Customer,
   DesignType,
 } from "../../interfaces/common";
 
 export default function OrderForm() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+
+  type SelectOption = {
+  value: string | number;
+  label: string;
+};
+
+  const [customers, setCustomers] = useState<SelectOption[]>([]);
   const [designTypes, setDesignTypes] = useState<DesignType[]>([]);
   const [finishings, setFinishing] = useState<Finishing[]>([]);
   const [panelSizes, setPanelSizes] = useState<DoorPartSize[]>([]);
@@ -104,6 +109,15 @@ export default function OrderForm() {
     }
   };
 
+  const getDesignTypeTitle = (id: string | number) =>
+  designTypes.find((dt) => dt.id === Number(id))?.title || "N/A";
+
+const getFinishingTitle = (id: string | number) =>
+  finishings.find((f) => f.id === Number(id))?.title || "N/A";
+
+const getPanelSize = (id: string | number) =>
+  panelSizes.find((p) => p.id === Number(id))?.size || "N/A";
+
   useEffect(() => {
   const loadAllData = async () => {
     try {
@@ -159,45 +173,41 @@ export default function OrderForm() {
   const [errors, setErrors] = useState<Errors>({});
 
   const handleAddDesign = () => {
-    const newErrors: any = {};
+  const newErrors: any = {};
 
-    if (!currentDesign.designType) newErrors.designType = true;
-    if (!currentDesign.designNo) newErrors.designNo = true;
-    if (!currentDesign.finishing) newErrors.finishing = true;
-    if (!currentDesign.size) newErrors.size = true;
-    if (!currentDesign.nos) newErrors.nos = true;
+  if (!currentDesign.designType) newErrors.designType = true;
+  if (!currentDesign.designNo) newErrors.designNo = true;
+  if (!currentDesign.finishing) newErrors.finishing = true;
+  if (!currentDesign.nos) newErrors.nos = true;
 
-    // Check if there are any errors
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    toast.error(
+      "Please fill in all required fields: Design Type, Design Number, Finishing, and Nos"
+    );
+    return;
+  }
 
-      toast.error(
-        "Please fill in all required fields: Design Type, Design Number, Finishing, Size, and Nos"
-      );
-      return;
-    }
+  // ✅ Save current design
+  const newDesign = { ...currentDesign, id: savedDesigns.length + 1 };
+  setSavedDesigns([...savedDesigns, newDesign]);
 
-    // Clear errors and save design
-    setErrors({});
-    setSavedDesigns([
-      ...savedDesigns,
-      { ...currentDesign, id: savedDesigns.length + 1 },
-    ]);
+  // ✅ Keep last selected type, finishing, size, design no
+  // 🔁 Reset only the specified fields
+  setCurrentDesign({
+    ...currentDesign,
+    id: 0,
+    panel: "",
+    size: "",
+    nos: "",
+    aSection: {},
+    frame: {},
+  });
 
-    // Reset current design
-    setCurrentDesign({
-      id: 0,
-      designType: "",
-      panelSize: "",
-      designNo: "",
-      finishing: "",
-      panel: "",
-      size: "",
-      nos: "",
-      aSection: {},
-      frame: {},
-    });
-  };
+  // ✅ Clear validation errors
+  setErrors({});
+};
+
 
   const handleSubmit = () => {
     console.log("Form submitted:", { formData, savedDesigns });
@@ -230,31 +240,31 @@ export default function OrderForm() {
           <div className="grid grid-cols-2 gap-6">
             <div className="relative">
               <Select
-                options={customers}
-                value={
-                  customers.find((opt) => opt.name === formData.customerName) ||
-                  null
-                }
-                onChange={(selectedOption) =>
-                  setFormData({
-                    ...formData,
-                    customerName: selectedOption ? selectedOption.name : "",
-                  })
-                }
-                placeholder="Select a Customer"
-                isClearable
-                className="w-full"
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    padding: "0.375rem 0",
-                    borderColor: "#d1d5db",
-                    "&:hover": {
-                      borderColor: "#d1d5db",
-                    },
-                  }),
-                }}
-              />
+  options={customers}
+  value={
+    customers.find((opt) => opt.label === formData.customerName) || null
+  }
+  onChange={(selectedOption) =>
+    setFormData({
+      ...formData,
+      customerName: selectedOption ? selectedOption.label : "",
+    })
+  }
+  placeholder="Select a Customer"
+  isClearable
+  className="w-full"
+  styles={{
+    control: (base) => ({
+      ...base,
+      padding: "0.375rem 0",
+      borderColor: "#d1d5db",
+      "&:hover": {
+        borderColor: "#d1d5db",
+      },
+    }),
+  }}
+/>
+
               <label
                 htmlFor="customerName"
                 className="absolute left-3 -top-2.5 bg-white px-1 text-sm text-gray-600"
@@ -644,59 +654,68 @@ export default function OrderForm() {
         {/* 3. Saved Designs Display Section (Tabular View) */}
         {/* Saved Designs Display Section (Dynamic View) */}
 {savedDesigns.map((design) => (
-  <div key={design.id} className="bg-white rounded-lg shadow-sm p-6">
-    <div className="flex items-center justify-between mb-4">
+  <div key={design.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-3">
+    {/* Header */}
+    <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
       <div className="flex items-center gap-2">
-        <FileText className="w-5 h-5" />
-        <h2 className="text-lg font-semibold">
+        <div className="p-1 bg-blue-50 rounded">
+          <FileText className="w-3.5 h-3.5 text-blue-600" />
+        </div>
+        <h2 className="text-base font-semibold text-gray-800">
           Design Details - SL - 0{design.id}
         </h2>
       </div>
-      <button className="text-sm text-gray-600 flex items-center gap-1 hover:text-gray-800">
-        <span className="text-lg">✎</span> Edit
+      <button className="px-2.5 py-1 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors flex items-center gap-1">
+        <span className="text-sm">✎</span> Edit
       </button>
     </div>
 
-    <div className="space-y-3 text-sm">
-      {/* Row 1: Basic Design Info */}
-      <div className="grid grid-cols-4 gap-6">
-        <div>
-          <span className="text-gray-600">Design Type:</span>
-          <span className="ml-2 font-medium">{design.designType || "N/A"}</span>
+    <div className="space-y-2">
+      {/* Row 1: Basic Information */}
+      <div className="grid grid-cols-5 gap-3">
+        <div className="bg-gray-50 rounded p-1.5">
+          <div className="text-xs text-gray-500 mb-0.5">Design Type</div>
+          <div className="text-sm font-semibold text-gray-800">
+             {getDesignTypeTitle(design.designType)}
+          </div>
         </div>
-        <div>
-          <span className="text-gray-600">Panel Size:</span>
-          <span className="ml-2 font-medium">{design.panelSize || "N/A"}</span>
+        <div className="bg-gray-50 rounded p-1.5">
+          <div className="text-xs text-gray-500 mb-0.5">Finishing</div>
+          <div className="text-sm font-semibold text-gray-800">
+            {getFinishingTitle(design.finishing)}
+          </div>
         </div>
-        <div>
-          <span className="text-gray-600">Nos:</span>
-          <span className="ml-2 font-medium">{design.nos || "0"}</span>
+        <div className="bg-gray-50 rounded p-1.5">
+          <div className="text-xs text-gray-500 mb-0.5">Panel Size</div>
+          <div className="text-sm font-semibold text-gray-800">
+            {getPanelSize(design.panelSize)}
+          </div>
         </div>
-        <div>
-          <span className="text-gray-600">Finishing:</span>
-          <span className="ml-2 font-medium">{design.finishing || "N/A"}</span>
+        <div className="bg-gray-50 rounded p-1.5">
+          <div className="text-xs text-gray-500 mb-0.5">Panel Nos</div>
+          <div className="text-sm font-semibold text-gray-800">
+            {design.nos || "0"}
+          </div>
+        </div>
+        <div className="bg-gray-50 rounded p-1.5">
+          <div className="text-xs text-gray-500 mb-0.5">Design No</div>
+          <div className="text-sm font-semibold text-gray-800">
+            {design.designNo || "N/A"}
+          </div>
         </div>
       </div>
 
-      {/* Row 2: Design & A Section */}
-      <div className="grid grid-cols-1 gap-2">
-        <div>
-          <span className="text-gray-600">Design No.:</span>
-          <span className="ml-2 font-medium">{design.designNo || "N/A"}</span>
-        </div>
-
-        {/* A Section Dynamic Values */}
-        <div>
-          <span className="text-gray-600">A Section:</span>
-          <div className="grid gap-3 mt-2"
-               style={{
-                 gridTemplateColumns: `repeat(${aSectionSizes.length}, minmax(0, 1fr))`
-               }}>
+      {/* Row 2: A Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-transparent rounded p-2">
+        <div className="flex items-center gap-4">
+          <div className="text-xs font-semibold text-gray-700 min-w-[70px]">
+            A Section:
+          </div>
+          <div className="flex gap-3 flex-wrap">
             {aSectionSizes.map((size) => (
-              
-              <div key={size.id} className="flex flex-col items-center text-center">
-                <span className="text-gray-600 text-xs">{size.size}</span>
-                <span className="font-medium">
+              <div key={size.id} className="flex flex-col items-center bg-white rounded p-1.5 min-w-[50px] shadow-sm">
+                <span className="text-xs text-gray-500">{size.size}</span>
+                <span className="text-sm font-bold text-gray-800">
                   {design.aSection[size.id as number] || "0"}
                 </span>
               </div>
@@ -705,21 +724,22 @@ export default function OrderForm() {
         </div>
       </div>
 
-      {/* Row 3: Frame Dynamic Values */}
-      <div>
-        <span className="text-gray-600">Frame:</span>
-        <div className="grid gap-3 mt-2"
-             style={{
-               gridTemplateColumns: `repeat(${frameSizes.length}, minmax(0, 1fr))`
-             }}>
-          {frameSizes.map((size) => (
-            <div key={size.id} className="flex flex-col items-center text-center">
-              <span className="text-gray-600 text-xs">{size.size}</span>
-              <span className="font-medium">
-                {design.frame[size.id as number] || "0"}
-              </span>
-            </div>
-          ))}
+      {/* Row 3: Frame */}
+      <div className="bg-gradient-to-r from-green-50 to-transparent rounded p-2">
+        <div className="flex items-center gap-4">
+          <div className="text-xs font-semibold text-gray-700 min-w-[70px]">
+            Frame:
+          </div>
+          <div className="flex gap-3 flex-wrap">
+            {frameSizes.map((size) => (
+              <div key={size.id} className="flex flex-col items-center bg-white rounded p-1.5 min-w-[50px] shadow-sm">
+                <span className="text-xs text-gray-500">{size.size}</span>
+                <span className="text-sm font-bold text-gray-800">
+                  {design.frame[size.id as number] || "0"}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
