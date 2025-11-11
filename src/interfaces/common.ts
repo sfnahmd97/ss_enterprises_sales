@@ -79,4 +79,12 @@ export interface OrderForm {
   id?: number;
   size: string;
 }
+export interface SelectOption {
+  value: string | number;
+  label: string;
+}
 
+export interface DesignCode {
+  id?: number;
+  design_code: string;
+}
