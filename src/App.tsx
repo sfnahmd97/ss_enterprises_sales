@@ -13,6 +13,7 @@ import EditProfile from "./Profile/EditProfile";
 import ChangePassword from "./Profile/changePassword";
 
 import CreateOrder from "./pages/Order/Create";
+import ListOrder from "./pages/Order/List";
 import CustomersList from "./pages/Customer/List";
 
 
@@ -61,6 +62,7 @@ export default function App() {
               <Layout>
                 <Routes>
                   <Route path="create" element={<CreateOrder />} />
+                  <Route path="list" element={<ListOrder />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

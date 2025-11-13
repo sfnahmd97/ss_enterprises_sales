@@ -5,6 +5,7 @@ interface Props {
   design: OrderForm;
   getDesignTypeTitle: (id: string | number) => string;
   getFinishingTitle: (id: string | number) => string;
+  getDesignCodeTitle: (id: string | number) => string;
   getPanelSize: (id: string | number) => string;
   aSectionSizes: DoorPartSize[];
   frameSizes: DoorPartSize[];
@@ -14,6 +15,7 @@ export default function DesignPreviewCard({
   design,
   getDesignTypeTitle,
   getFinishingTitle,
+  getDesignCodeTitle,
   getPanelSize,
   aSectionSizes,
   frameSizes,
@@ -68,7 +70,7 @@ export default function DesignPreviewCard({
           <div className="bg-gray-50 rounded p-1.5">
             <div className="text-xs text-gray-500 mb-0.5">Design No</div>
             <div className="text-sm font-semibold text-gray-800">
-              {design.designNo || "N/A"}
+              {getDesignCodeTitle(design.designNo) || "N/A"}
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import api from "../../lib/axios";
 import { Link } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomerDetails from "./Components/CustomerDetails";
+import { useNavigate } from "react-router-dom";
 
 import type {
   DoorPartSize,
@@ -18,6 +19,8 @@ import DesignPreviewCard from "./Components/DesignPreviewCard";
 import DesignDetails from "./Components/DesginDetails";
 
 export default function OrderForm() {
+
+  const navigate = useNavigate();
   type SelectOption = {
     value: string | number;
     label: string;
@@ -125,6 +128,9 @@ export default function OrderForm() {
   const getPanelSize = (id: string | number) =>
     panelSizes.find((p) => p.id === Number(id))?.size || "N/A";
 
+  const getDesignCodeTitle = (id: string | number) =>
+    designCodes.find((dc) => dc.id === Number(id))?.design_code || "N/A";
+
   useEffect(() => {
     const loadAllData = async () => {
       try {
@@ -159,8 +165,6 @@ export default function OrderForm() {
     panelSize: "",
     designNo: "",
     finishing: "",
-    panel: "",
-    size: "",
     nos: "",
     aSection: {},
     frame: {},
@@ -207,8 +211,6 @@ export default function OrderForm() {
     setCurrentDesign({
       ...currentDesign,
       id: 0,
-      panel: "",
-      size: "",
       nos: "",
       aSection: {},
       frame: {},
@@ -218,10 +220,7 @@ export default function OrderForm() {
     setErrors({});
   };
 
-  const handleSubmit = () => {
-
-   
-
+  const handleSubmit = async ({ resetForm }: any) => {
   const { customerName, deliveryDate } = formData;
 
   if (!customerName || !deliveryDate) {
@@ -239,6 +238,33 @@ export default function OrderForm() {
   }
 
     console.log("Form submitted:", { formData, savedDesigns });
+    const submissionData = {
+    ...formData,
+    designs: savedDesigns,
+  };
+
+    try {
+          const res = await api.post("/sales/order/create", submissionData);
+    
+          const success = (res.data as { success: any[] }).success;
+          const message = (res.data as { message: string }).message;
+    
+          if (success) {
+            toast.success(message);
+            resetForm();
+            navigate("/profile/change-password");
+          } else {
+            toast.error("Something went wrong");
+          }
+        } catch (error: any) {
+          if (error.response?.data?.errors) {
+            const formatted: any = {};
+            Object.keys(error.response.data.errors).forEach(
+              (f) => (formatted[f] = error.response.data.errors[f][0])
+            );
+            setErrors(formatted);
+          } else toast.error("Server error");
+        }
   };
 
   if (loading) {
@@ -304,6 +330,7 @@ export default function OrderForm() {
             design={design}
             getDesignTypeTitle={getDesignTypeTitle}
             getFinishingTitle={getFinishingTitle}
+            getDesignCodeTitle={getDesignCodeTitle}
             getPanelSize={getPanelSize}
             aSectionSizes={aSectionSizes}
             frameSizes={frameSizes}

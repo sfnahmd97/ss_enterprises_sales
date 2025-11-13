@@ -69,8 +69,6 @@ export interface OrderForm {
     panelSize: string;
     designNo: string;
     finishing: string;
-    panel?: string;
-    size: string;
     nos: string;
     aSection: SectionValues;
     frame: SectionValues;
@@ -87,4 +85,12 @@ export interface SelectOption {
 export interface DesignCode {
   id?: number;
   design_code: string;
+}
+
+export interface Order {
+  id?: number;
+  code: string;
+  customer_id?: number;
+  customer?: Customer;
+  status: string;
 }

@@ -232,14 +232,17 @@ export default function DesignDetails({
             <div className="relative">
               <Select
                 options={designCodes.map((d) => ({
-                  value: d.design_code,
+                  value: String(d.id ?? ""),
                   label: d.design_code,
                 }))}
                 value={
                   currentDesign.designNo
                     ? {
                         value: currentDesign.designNo,
-                        label: currentDesign.designNo,
+                        label: designCodes.find(
+                            (d) =>
+                              String(d.id ?? "") === currentDesign.designNo
+                          )?.design_code || "",
                       }
                     : null
                 }
