@@ -4,7 +4,7 @@ import api from "../../lib/axios";
 import type { ListApiResponse } from "../../interfaces/common";
 import Swal from "sweetalert2";
 import Pagination from "../../components/common/Pagination";
-import { ChevronLeft, Search, Filter, X } from "lucide-react";
+import { ChevronLeft, Search, Filter, X, Eye } from "lucide-react";
 
 export default function Main() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -229,6 +229,9 @@ export default function Main() {
                   <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Created At
                   </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -278,12 +281,22 @@ export default function Main() {
                           {val.status}
                         </span>
                       </td>
+                      
                       <td className="px-6 py-4 text-center text-sm text-gray-900">
                         {new Date(val.created_at).toLocaleDateString("en-IN", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric"
                         })}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <Link
+                        to={`/orders/details/${val.id}`}
+                        className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+                        title="Edit"
+                      >
+                        <Eye size={16} />
+                      </Link>
                       </td>
                     </tr>
                   ))
@@ -296,55 +309,6 @@ export default function Main() {
                 )}
               </tbody>
             </table>
-          </div>
-
-          {/* Mobile/Tablet Card View */}
-          <div className="lg:hidden">
-            {loading ? (
-              <div className="p-8 text-center">
-                <div className="inline-block w-8 h-8 border-3 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-2 text-sm text-gray-500">Loading orders...</p>
-              </div>
-            ) : orders.length > 0 ? (
-              <div className="divide-y divide-gray-100">
-                {orders.map((val, index) => (
-                  <div
-                    key={val.id}
-                    className="p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-base font-semibold text-gray-900">
-                            {val.code}
-                          </h3>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            val.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                            val.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                            val.status === 'processing' ? 'bg-purple-100 text-purple-700' :
-                            val.status === 'confirmed' ? 'bg-cyan-100 text-cyan-700' :
-                            val.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                            'bg-yellow-100 text-yellow-700'
-                          }`}>
-                            {val.status}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600">{val.customer.name}</p>
-                        <p className="text-xs text-gray-500 mt-1">{val.customer.full_location}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
-                      <span>Delivery: {new Date(val.delivery_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</span>
-                      <span>Created: {new Date(val.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-12 text-center">
-                <p className="text-sm text-gray-500">No orders found</p>
-              </div>
-            )}
           </div>
 
           {/* Pagination */}

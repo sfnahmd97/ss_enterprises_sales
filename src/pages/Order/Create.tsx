@@ -9,10 +9,8 @@ import { useNavigate } from "react-router-dom";
 
 import type {
   DoorPartSize,
-  Finishing,
   OrderForm,
-  DesignType,
-  DesignCode,
+  SelectOption,
 } from "../../interfaces/common";
 import PageLoader from "../../components/common/pageLoader";
 import DesignPreviewCard from "./Components/DesignPreviewCard";
@@ -21,25 +19,27 @@ import DesignDetails from "./Components/DesginDetails";
 export default function OrderForm() {
 
   const navigate = useNavigate();
-  type SelectOption = {
-    value: string | number;
-    label: string;
-  };
 
   const [customers, setCustomers] = useState<SelectOption[]>([]);
-  const [designTypes, setDesignTypes] = useState<DesignType[]>([]);
-  const [finishings, setFinishing] = useState<Finishing[]>([]);
-  const [panelSizes, setPanelSizes] = useState<DoorPartSize[]>([]);
+  const [designTypes, setDesignTypes] = useState<SelectOption[]>([]);
+  const [finishings, setFinishing] = useState<SelectOption[]>([]);
+  const [panelSizes, setPanelSizes] = useState<SelectOption[]>([]);
   const [aSectionSizes, setASectionSizes] = useState<DoorPartSize[]>([]);
   const [frameSizes, setFrameSizes] = useState<DoorPartSize[]>([]);
-  const [designCodes, setDesignCodes] = useState<DesignCode[]>([]);
+  const [designCodes, setDesignCodes] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDesignTypes = async () => {
     try {
       const res = await api.get("sales/get-design-types");
       const data = (res.data as { data: any }).data;
-      setDesignTypes(data);
+
+      const formattedData = data.map((designType: any) => ({
+        value: designType.id,
+        label: designType.title,
+      }));
+
+      setDesignTypes(formattedData);
     } catch (error) {
       console.error("Failed to load design types", error);
     }
@@ -50,7 +50,12 @@ export default function OrderForm() {
       const res = await api.get("sales/get-finishing");
       const data = (res.data as { data: any }).data;
 
-      setFinishing(data);
+      const formattedData = data.map((finishing: any) => ({
+        value: finishing.id,
+        label: finishing.title,
+      }));
+
+      setFinishing(formattedData);
     } catch (error) {
       console.error("Failed to load finishing", error);
     }
@@ -60,7 +65,13 @@ export default function OrderForm() {
     try {
       const res = await api.get("sales/get-door-part-sizes/panel");
       const data = (res.data as { data: any }).data;
-      setPanelSizes(data);
+
+      const formattedData = data.map((panelSize: any) => ({
+        value: panelSize.id,
+        label: panelSize.size,
+      }));
+
+      setPanelSizes(formattedData);
     } catch (error) {
       console.error("Failed to load Panel Sizes", error);
     }
@@ -96,7 +107,13 @@ export default function OrderForm() {
       }`;
       const res = await api.get(url);
       const data = (res.data as { data: any[] }).data;
-      setDesignCodes(data);
+
+      const formattedData = data.map((design: any) => ({
+        value: design.id,
+        label: design.design_code,
+      }));
+
+      setDesignCodes(formattedData);
     } catch (error) {
       console.error("Failed to load designs", error);
       setDesignCodes([]);
@@ -120,16 +137,16 @@ export default function OrderForm() {
   };
 
   const getDesignTypeTitle = (id: string | number) =>
-    designTypes.find((dt) => dt.id === Number(id))?.title || "N/A";
+    designTypes.find((dt) => dt.value === Number(id))?.label || "N/A";
 
   const getFinishingTitle = (id: string | number) =>
-    finishings.find((f) => f.id === Number(id))?.title || "N/A";
+    finishings.find((f) => f.value === Number(id))?.label || "N/A";
 
   const getPanelSize = (id: string | number) =>
-    panelSizes.find((p) => p.id === Number(id))?.size || "N/A";
+    panelSizes.find((p) => p.value === Number(id))?.label || "N/A";
 
   const getDesignCodeTitle = (id: string | number) =>
-    designCodes.find((dc) => dc.id === Number(id))?.design_code || "N/A";
+    designCodes.find((dc) => dc.value === Number(id))?.label || "N/A";
 
   useEffect(() => {
     const loadAllData = async () => {
@@ -215,12 +232,12 @@ export default function OrderForm() {
       aSection: {},
       frame: {},
     });
-
+      toast.success("Design Added.");
     // ✅ Clear validation errors
     setErrors({});
   };
 
-  const handleSubmit = async ({ resetForm }: any) => {
+  const handleSubmit = async () => {
   const { customerName, deliveryDate } = formData;
 
   if (!customerName || !deliveryDate) {
@@ -250,13 +267,35 @@ export default function OrderForm() {
           const message = (res.data as { message: string }).message;
     
           if (success) {
+      const data = (res.data as { data: any }).data;
+      const orderId = data.id;
             toast.success(message);
-            resetForm();
-            navigate("/profile/change-password");
+             setFormData({
+        customerName: "",
+        place: "",
+        brand: "",
+        deliveryDate: "",
+      });
+
+      setSavedDesigns([]);
+      setCurrentDesign({
+        id: 0,
+        designType: "",
+        panelSize: "",
+        designNo: "",
+        finishing: "",
+        nos: "",
+        aSection: {},
+        frame: {},
+      });
+
+      setErrors({});
+            navigate("/orders/details/"+orderId);
           } else {
             toast.error("Something went wrong");
           }
         } catch (error: any) {
+          console.log("error: "+error);
           if (error.response?.data?.errors) {
             const formatted: any = {};
             Object.keys(error.response.data.errors).forEach(

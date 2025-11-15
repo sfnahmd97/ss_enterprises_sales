@@ -62,6 +62,7 @@ const Home: React.FC = () => {
             color="blue"
           />
         </Link>
+        <Link to="/orders/list">
         <StatCard
           title="Total Orders"
           value={totalOrdersCount}
@@ -70,6 +71,8 @@ const Home: React.FC = () => {
           icon={ShoppingCart}
           color="green"
         />
+        </Link>
+        <Link to="/orders/list">
         <StatCard
           title="Pending Orders"
           value={pendingOrdersCount}
@@ -78,6 +81,7 @@ const Home: React.FC = () => {
           icon={Clock}
           color="orange"
         />
+        </Link>
       </section>
 
       {/* Pending Orders Table */}

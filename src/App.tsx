@@ -12,8 +12,11 @@ import SettingsPage from "./pages/Settings";
 import EditProfile from "./Profile/EditProfile";
 import ChangePassword from "./Profile/changePassword";
 
+{/* Order */}
 import CreateOrder from "./pages/Order/Create";
 import ListOrder from "./pages/Order/List";
+import Details from "./pages/Order/Details";
+
 import CustomersList from "./pages/Customer/List";
 
 
@@ -63,6 +66,7 @@ export default function App() {
                 <Routes>
                   <Route path="create" element={<CreateOrder />} />
                   <Route path="list" element={<ListOrder />} />
+                  <Route path="details/:id" element={<Details />}/>
                 </Routes>
               </Layout>
             </ProtectedRoute>
