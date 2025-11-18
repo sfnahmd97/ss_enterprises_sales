@@ -30,6 +30,11 @@ type Status =
   | "cancelled"
   | "pending";
 
+  interface PanelSize {
+  id: number;
+  size: string;
+}
+
 interface ASectionSize {
   id: number;
   size: string;
@@ -61,6 +66,7 @@ interface FrameSize {
   created_at: string;
   updated_at: string;
 }
+
 
 interface FrameItem {
   id: number;
@@ -109,6 +115,7 @@ interface OrderDesign {
   design_id: number;
   design_type_id: number;
   panel_size_id: number;
+  panel_size: PanelSize;
   finishing_id: number;
   nos: number;
   created_at: string;
@@ -429,7 +436,7 @@ const OrderDetailPage: React.FC = () => {
                         <div className="bg-gray-50 rounded p-1.5">
                           <div className="text-xs text-gray-500 mb-0.5">Panel Size</div>
                           <div className="text-sm font-semibold text-gray-800">
-                            {design.panel_size_id}
+                            {design.panel_size.size}
                           </div>
                         </div>
                         <div className="bg-gray-50 rounded p-1.5">
