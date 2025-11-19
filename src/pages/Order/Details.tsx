@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import type { PanelSize,States,Districts,Location,ASectionSize,FrameSize,DesignType,Finishing } from "../../interfaces/common";
+
 import {
   ChevronLeft,
   Package,
@@ -30,21 +32,7 @@ type Status =
   | "cancelled"
   | "pending";
 
-  interface PanelSize {
-  id: number;
-  size: string;
-}
-
-interface ASectionSize {
-  id: number;
-  size: string;
-  door_part_id: number;
-  status: number;
-  deleted_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
+ 
 interface ASection {
   id: number;
   order_id: number;
@@ -56,17 +44,6 @@ interface ASection {
   size: string;
   a_section_size: ASectionSize;
 }
-
-interface FrameSize {
-  id: number;
-  size: string;
-  door_part_id: number;
-  status: number;
-  deleted_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 
 interface FrameItem {
   id: number;
@@ -80,17 +57,6 @@ interface FrameItem {
   frame_size: FrameSize;
 }
 
-interface DesignType {
-  id: number;
-  title: string;
-  short: string;
-}
-
-interface Finishing {
-  id: number;
-  title: string;
-  short: string;
-}
 
 interface Design {
   id: number;
@@ -134,8 +100,11 @@ interface Customer {
   email: string;
   phone_no: string;
   state_id: number;
+  state : States;
   district_id: number;
+  district: Districts;
   location_id: number;
+  location: Location;
   brand_id: number;
   status: number;
   full_location: string;
@@ -321,7 +290,7 @@ const OrderDetailPage: React.FC = () => {
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Customer</p>
                   <p className="font-semibold text-gray-900">{customer.name}</p>
-                  <p className="text-xs text-gray-500">{customer.email}</p>
+                  <p className="text-xs text-gray-500">{customer.phone_no}</p>
                 </div>
               </div>
 
@@ -332,8 +301,8 @@ const OrderDetailPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Location</p>
-                  <p className="font-semibold text-gray-900">{customer.full_location}</p>
-                  <p className="text-xs text-gray-500">{customer.phone_no}</p>
+                  <p className="font-semibold text-gray-900">{customer.location.location_name}</p>
+                  <p className="text-xs text-gray-500">{customer.district.name},{customer.state.name}</p>
                 </div>
               </div>
 

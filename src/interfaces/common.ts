@@ -50,7 +50,7 @@ export interface UserData {
 }
  export interface States {
   id?: number;
-  key: string;
+  key?: string;
   name: string;
 }
  export interface Districts {
@@ -94,3 +94,29 @@ export interface Order {
   customer?: Customer;
   status: string;
 }
+
+export interface PanelSize {
+  id: number;
+  size: string;
+}
+
+export interface ASectionSize {
+  id: number;
+  size: string;
+  door_part_id: number;
+  status: number;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FrameSize {
+  id: number;
+  size: string;
+  door_part_id: number;
+  status: number;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
