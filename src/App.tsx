@@ -15,7 +15,6 @@ import ChangePassword from "./Profile/changePassword";
 {/* Order */}
 import CreateOrder from "./pages/Order/Create";
 import ListOrder from "./pages/Order/List";
-import PendingOrderList from "./pages/Order/PendingList";
 import Details from "./pages/Order/Details";
 
 import CustomersList from "./pages/Customer/List";
@@ -67,7 +66,6 @@ export default function App() {
                 <Routes>
                   <Route path="create" element={<CreateOrder />} />
                   <Route path="list" element={<ListOrder />} />
-                  <Route path="pending-list" element={<PendingOrderList />} />
                   <Route path="details/:id" element={<Details />}/>
                 </Routes>
               </Layout>

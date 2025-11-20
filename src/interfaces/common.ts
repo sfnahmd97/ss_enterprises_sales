@@ -120,3 +120,10 @@ export interface FrameSize {
   updated_at: string;
 }
 
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+};
+

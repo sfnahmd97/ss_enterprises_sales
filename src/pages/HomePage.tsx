@@ -72,7 +72,7 @@ const Home: React.FC = () => {
           color="green"
         />
         </Link>
-        <Link to="/orders/pending-list">
+        <Link to="/orders/list?status=pending">
         <StatCard
           title="Pending Orders"
           value={pendingOrdersCount}

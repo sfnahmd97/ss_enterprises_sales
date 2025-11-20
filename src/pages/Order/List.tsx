@@ -1,15 +1,17 @@
-import { Link,useNavigate } from "react-router-dom";
+import { Link,useSearchParams  } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../../lib/axios";
 import type { ListApiResponse } from "../../interfaces/common";
 import Swal from "sweetalert2";
 import Pagination from "../../components/common/Pagination";
 import { ChevronLeft, Search, Filter, X } from "lucide-react";
+import SalesManagerOrders from "./Components/SalesManagerOrders";
 
 export default function Main() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,7 +25,6 @@ export default function Main() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const navigate = useNavigate();
 
   const fetchOrders = async (page = 1, search = "", status = "", start = "", end = "") => {
     try {
@@ -74,9 +75,21 @@ export default function Main() {
 
   const hasActiveFilters = statusFilter || startDate || endDate;
 
+  // useEffect(() => {
+  //   fetchOrders(currentPage, searchTerm, statusFilter, startDate, endDate);
+  // }, [currentPage]);
+
   useEffect(() => {
+  const statusFromURL = searchParams.get("status");
+
+  if (statusFromURL) {
+    setStatusFilter(statusFromURL);
+    setShowFilters(true);
+    fetchOrders(currentPage, searchTerm, statusFromURL, startDate, endDate);
+  } else {
     fetchOrders(currentPage, searchTerm, statusFilter, startDate, endDate);
-  }, [currentPage]);
+  }
+}, [currentPage]);
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
@@ -206,115 +219,12 @@ export default function Main() {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden lg:block overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    #
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Order Code
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Delivery Date
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Created At
-                  </th>
-                  {/* <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Action
-                  </th> */}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
-                      <div className="inline-block w-8 h-8 border-3 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-                      <p className="mt-2 text-sm text-gray-500">Loading orders...</p>
-                    </td>
-                  </tr>
-                ) : orders.length > 0 ? (
-                  orders.map((val, index) => (
-                    <tr
-                      key={val.id}
-                      onClick={() => navigate(`/orders/details/${val.id}`)}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        {(currentPage - 1) * perPage + (index + 1)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-gray-900">{val.code}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {val.customer.name ?? "N/A"}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {val.customer.full_location}
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm text-gray-900">
-                        {new Date(val.delivery_date).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric"
-                        })}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          val.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                          val.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                          val.status === 'processing' ? 'bg-purple-100 text-purple-700' :
-                          val.status === 'confirmed' ? 'bg-cyan-100 text-cyan-700' :
-                          val.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                          'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {val.status}
-                        </span>
-                      </td>
-                      
-                      <td className="px-6 py-4 text-center text-sm text-gray-900">
-                        {new Date(val.created_at).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric"
-                        })}
-                      </td>
-                      {/* <td className="px-6 py-4 text-center"
-                      onClick={(e) => e.stopPropagation()}
-                      >
-                        <Link
-                        to={`/orders/details/${val.id}`}
-                        className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
-                        title="Edit"
-                      >
-                        <Eye size={16} />
-                      </Link>
-                      </td> */}
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
-                      <p className="text-sm text-gray-500">No orders found</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <SalesManagerOrders
+                      orders={orders}
+                      loading={loading}
+                      currentPage={currentPage}
+                      perPage={perPage}
+                    />
 
           {/* Pagination */}
           {!loading && orders.length > 0 && (

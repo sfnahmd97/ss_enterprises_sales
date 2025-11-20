@@ -24,10 +24,12 @@ export default function Main() {
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
+  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+  const userRole = authUser.role;
+
   const fetchCustomer = async (page = 1, search = "") => {
     try {
       setLoading(true);
-
       const params: any = { page, per_page: perPage };
       if (search) params.search_key = search;
       const res = await api.get<ListApiResponse<any[]>>(`/sales/get-customers-list`, {
@@ -76,16 +78,27 @@ export default function Main() {
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
       {/* Breadcrumbs */}
-      <div className="flex items-center mb-6">
-        <Link
-          to="/dashboard"
-          className="flex items-center text-gray-600 hover:text-blue-600 transition-colors font-medium"
-          title="Go to Dashboard"
-        >
-          <ChevronLeft className="mr-1" size={20} />
-          <span>Dashboard</span>
-        </Link>
-      </div>
+      <div className="flex items-center justify-between mb-6">
+  {/* Left Side: Back Link */}
+  <Link
+    to="/dashboard"
+    className="flex items-center text-gray-600 hover:text-blue-600 transition-colors font-medium"
+    title="Go to Dashboard"
+  >
+    <ChevronLeft className="mr-1" size={20} />
+    <span>Dashboard</span>
+  </Link>
+
+  {/* Right Side: Button */}
+
+  {userRole === "distributor" && (
+  <button
+    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+  >
+    Add Customer
+  </button>
+  )}
+</div>
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto">
