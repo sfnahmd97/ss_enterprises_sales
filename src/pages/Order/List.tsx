@@ -1,4 +1,4 @@
-import { Link,useSearchParams  } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../../lib/axios";
 import type { ListApiResponse } from "../../interfaces/common";
@@ -6,6 +6,10 @@ import Swal from "sweetalert2";
 import Pagination from "../../components/common/Pagination";
 import { ChevronLeft, Search, Filter, X } from "lucide-react";
 import SalesManagerOrders from "./Components/SalesManagerOrders";
+import DefaultOrders from "./Components/DefaultOrders";
+import toast from "react-hot-toast";
+import { confirmAlert } from "../../lib/alertUtils";
+
 
 export default function Main() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -25,8 +29,16 @@ export default function Main() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+  const userRole = authUser.role;
 
-  const fetchOrders = async (page = 1, search = "", status = "", start = "", end = "") => {
+  const fetchOrders = async (
+    page = 1,
+    search = "",
+    status = "",
+    start = "",
+    end = ""
+  ) => {
     try {
       setLoading(true);
 
@@ -36,9 +48,12 @@ export default function Main() {
       if (start) params.start_date = start;
       if (end) params.end_date = end;
 
-      const res = await api.get<ListApiResponse<any[]>>(`/sales/order/get-order-list`, {
-        params,
-      });
+      const res = await api.get<ListApiResponse<any[]>>(
+        `/sales/order/get-order-list`,
+        {
+          params,
+        }
+      );
 
       const response = res.data;
 
@@ -58,6 +73,27 @@ export default function Main() {
       setLoading(false);
     }
   };
+
+    const updateOrderStatus = async (orderId: number, newStatus: string) => {
+  confirmAlert(
+      "You want to assign this order!",
+      async () => {
+        try {
+          const res = await api.post(`/sales/order/update-assign-status/${orderId}`, {
+      assign_status: newStatus,
+    });
+          const message = (res.data as { message: string }).message;
+          toast.success(message);
+          fetchOrders(currentPage);
+        } catch (error: any) {
+          console.error("Failed:", error);
+          toast.error(error.response?.data?.message);
+        } finally {
+        }
+      },
+      () => console.log("Change status cancelled")
+    );
+};
 
   const applyFilters = () => {
     setCurrentPage(1);
@@ -80,16 +116,16 @@ export default function Main() {
   // }, [currentPage]);
 
   useEffect(() => {
-  const statusFromURL = searchParams.get("status");
+    const statusFromURL = searchParams.get("status");
 
-  if (statusFromURL) {
-    setStatusFilter(statusFromURL);
-    setShowFilters(true);
-    fetchOrders(currentPage, searchTerm, statusFromURL, startDate, endDate);
-  } else {
-    fetchOrders(currentPage, searchTerm, statusFilter, startDate, endDate);
-  }
-}, [currentPage]);
+    if (statusFromURL) {
+      setStatusFilter(statusFromURL);
+      setShowFilters(true);
+      fetchOrders(currentPage, searchTerm, statusFromURL, startDate, endDate);
+    } else {
+      fetchOrders(currentPage, searchTerm, statusFilter, startDate, endDate);
+    }
+  }, [currentPage]);
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
@@ -111,7 +147,9 @@ export default function Main() {
           {/* Header */}
           <div className="p-5 lg:p-6 border-b border-gray-200 space-y-4">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <h6 className="text-xl lg:text-2xl font-bold text-gray-900">Orders</h6>
+              <h6 className="text-xl lg:text-2xl font-bold text-gray-900">
+                Orders
+              </h6>
               <div className="flex items-center gap-3">
                 <div className="relative flex-1 sm:flex-initial">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -122,7 +160,13 @@ export default function Main() {
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
-                      fetchOrders(1, e.target.value, statusFilter, startDate, endDate);
+                      fetchOrders(
+                        1,
+                        e.target.value,
+                        statusFilter,
+                        startDate,
+                        endDate
+                      );
                     }}
                   />
                 </div>
@@ -130,15 +174,18 @@ export default function Main() {
                   onClick={() => setShowFilters(!showFilters)}
                   className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors ${
                     hasActiveFilters
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? "bg-green-600 text-white hover:bg-green-700"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   <Filter className="w-4 h-4" />
                   <span className="hidden sm:inline">Filters</span>
                   {hasActiveFilters && (
                     <span className="bg-white text-green-600 text-xs px-1.5 py-0.5 rounded-full font-semibold">
-                      {[statusFilter, startDate, endDate].filter(Boolean).length}
+                      {
+                        [statusFilter, startDate, endDate].filter(Boolean)
+                          .length
+                      }
                     </span>
                   )}
                 </button>
@@ -219,13 +266,22 @@ export default function Main() {
           </div>
 
           {/* Desktop Table View */}
-          <SalesManagerOrders
-                      orders={orders}
-                      loading={loading}
-                      currentPage={currentPage}
-                      perPage={perPage}
-                    />
-
+          {userRole === "sales_manager" ? (
+            <SalesManagerOrders
+              orders={orders}
+              loading={loading}
+              currentPage={currentPage}
+              perPage={perPage}
+              updateOrderStatus={(id,assignStatus) => updateOrderStatus(id,assignStatus)}
+            />
+          ) : (
+            <DefaultOrders
+              orders={orders}
+              loading={loading}
+              currentPage={currentPage}
+              perPage={perPage}
+            />
+          )}
           {/* Pagination */}
           {!loading && orders.length > 0 && (
             <Pagination

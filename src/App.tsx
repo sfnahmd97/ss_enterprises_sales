@@ -18,6 +18,8 @@ import ListOrder from "./pages/Order/List";
 import Details from "./pages/Order/Details";
 
 import CustomersList from "./pages/Customer/List";
+import AddCustomer from "./pages/Customer/Add";
+import EditCustomer from "./pages/Customer/Edit";
 
 
 export default function App() {
@@ -50,8 +52,10 @@ export default function App() {
               <Layout>
                 <Routes>
                   
-                  {/* Finishing */}
+                  {/* Customer */}
                   <Route path="list" element={<CustomersList />} />
+                  <Route path="add" element={<AddCustomer />} />
+                  <Route path="edit/:id" element={<EditCustomer />}/>
                 </Routes>
               </Layout>
             </ProtectedRoute>

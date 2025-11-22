@@ -14,6 +14,13 @@ export interface ListApiResponse<T> {
 export interface Customer {
   id?: number;
   name: string;
+  phone_no: string | "";
+  email: string | "";
+  state_id: number | "";
+  district_id: number | "";
+  location_id: number | "";
+  brand_id: number | "";
+  status?: boolean;
 }
 
  export interface DesignType {
@@ -126,4 +133,10 @@ export interface AuthUser {
   email: string;
   role: string;
 };
+
+export interface Brand {
+  id?: number;
+  name: string;
+  status?: boolean;
+}
 
