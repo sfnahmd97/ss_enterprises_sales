@@ -1,4 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import Modal from "../../../components/common/Modal";
+import { useState } from "react";
+import api from "../../../lib/axios";
 
 interface Props {
   orders: any[];
@@ -8,7 +11,7 @@ interface Props {
   updateOrderStatus: (id: number, assignStatus: string) => void;
 }
 
-export default function SalesManagerOrders({
+export default function SalesCoordinatorOrders({
   orders,
   loading,
   currentPage,
@@ -16,6 +19,23 @@ export default function SalesManagerOrders({
   updateOrderStatus,
 }: Props) {
   const navigate = useNavigate();
+
+  const [showModal, setShowModal] = useState(false);
+  const [customerOrders, setCustomerOrders] = useState<any[]>([]);
+  const [customerName, setCustomerName] = useState("");
+
+  const openCustomerOrdersModal = async (customerId: number, name: string) => {
+    try {
+      setCustomerName(name);
+      setShowModal(true);
+
+      const res = await api.get(`/sales/order/get-customer-orders/${customerId}`);
+      const data = (res.data as { data: any }).data;
+      setCustomerOrders(data);
+    } catch (err) {
+      console.error("Failed to load customer orders", err);
+    }
+  };
 
   return (
     <div className="hidden lg:block overflow-x-auto">
@@ -144,14 +164,23 @@ export default function SalesManagerOrders({
                     className="px-6 py-4 text-center"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {val.assign_status === "not_assigned" ? (
+                    <button
+    onClick={() =>
+      openCustomerOrdersModal(val.customer_id, val.customer.name)
+    }
+    className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+  >
+    View Customer Orders
+  </button>
+
+                    {val.assign_status === "sales_coordinator" ? (
                       <button
                         onClick={() =>
-                          updateOrderStatus(val.id, "sales_coordinator")
+                          updateOrderStatus(val.id, "production_manager")
                         }
                         className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                       >
-                        Assign to Sales Coordinator
+                        Assign to Production Manager
                       </button>
                     ) : (
                       val.assign_label
@@ -169,6 +198,68 @@ export default function SalesManagerOrders({
           )}
         </tbody>
       </table>
+
+      <Modal
+  open={showModal}
+  onClose={() => setShowModal(false)}
+  title={`Orders for ${customerName}`}
+  size="full"
+>
+  {customerOrders.length > 0 ? (
+    <div className="overflow-hidden rounded-lg border border-gray-200">
+      <div className="overflow-x-auto max-h-96 overflow-y-auto">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 z-10">
+            <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Order Code</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Delivery Date</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Status</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {customerOrders.map((order) => (
+              <tr
+                key={order.id}
+                className="hover:bg-blue-50 cursor-pointer transition-colors duration-150"
+                onClick={() => navigate(`/orders/details/${order.id}`)}
+              >
+                <td className="px-4 py-3 font-medium text-gray-900">{order.code}</td>
+                <td className="px-4 py-3 text-gray-600">
+                  {new Date(order.delivery_date).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      order.status === "delivered"
+                        ? "bg-green-100 text-green-800"
+                        : order.status === "pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : order.status === "cancelled"
+                        ? "bg-red-100 text-red-800"
+                        : order.status === "processing"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ) : (
+    <div className="text-center py-8">
+      <p className="text-gray-500 text-sm">No orders found for this customer.</p>
+    </div>
+  )}
+</Modal>
     </div>
   );
 }

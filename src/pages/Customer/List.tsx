@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import SalesCustomers from "./SalesCustomers";
 import DistributorCustomers from "./DistributorCustomers";
+import { useAuthStore } from "../../store/authStore";
 
 export default function Main() {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -35,8 +36,7 @@ export default function Main() {
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
-  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
-  const userRole = authUser.role;
+  const userRole = useAuthStore((state) => state.user?.role);
 
   const fetchCustomer = async (page = 1, search = "") => {
     try {

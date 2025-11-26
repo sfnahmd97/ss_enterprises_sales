@@ -4,12 +4,15 @@ import StatCard from "../components/StateCard";
 import { Users, ShoppingCart, Clock, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../lib/axios";
+import { useAuthStore } from "../store/authStore";
 
 const Home: React.FC = () => {
   const [customerCount, setCustomerCount] = useState(0);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   const [totalOrdersCount, setTotalOrdersCount] = useState(0);
   const [pendingOrders, setpendingOrders] = useState<any[]>([]);
+
+  const userRole = useAuthStore((state) => state.user?.role);
 
   const fetchDashboardData = async () => {
     try {
@@ -41,13 +44,15 @@ const Home: React.FC = () => {
           </p>
         </div>
 
-        <Link
-          to="/orders/create"
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-3 rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition-all"
-        >
-          <Plus size={20} />
-          Add Order
-        </Link>
+        {userRole != "sales_coordinator" && (
+          <Link
+            to="/orders/create"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-3 rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition-all"
+          >
+            <Plus size={20} />
+            Add Order
+          </Link>
+        )}
       </header>
 
       {/* Stat Cards */}
@@ -63,24 +68,24 @@ const Home: React.FC = () => {
           />
         </Link>
         <Link to="/orders/list">
-        <StatCard
-          title="Total Orders"
-          value={totalOrdersCount}
-          change="+5.1%"
-          positive={true}
-          icon={ShoppingCart}
-          color="green"
-        />
+          <StatCard
+            title="Total Orders"
+            value={totalOrdersCount}
+            change="+5.1%"
+            positive={true}
+            icon={ShoppingCart}
+            color="green"
+          />
         </Link>
         <Link to="/orders/list?status=pending">
-        <StatCard
-          title="Pending Orders"
-          value={pendingOrdersCount}
-          change="-1.2%"
-          positive={false}
-          icon={Clock}
-          color="orange"
-        />
+          <StatCard
+            title="Pending Orders"
+            value={pendingOrdersCount}
+            change="-1.2%"
+            positive={false}
+            icon={Clock}
+            color="orange"
+          />
         </Link>
       </section>
 

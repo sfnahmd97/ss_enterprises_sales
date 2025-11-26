@@ -9,7 +9,8 @@ import SalesManagerOrders from "./Components/SalesManagerOrders";
 import DefaultOrders from "./Components/DefaultOrders";
 import toast from "react-hot-toast";
 import { confirmAlert } from "../../lib/alertUtils";
-
+import { useAuthStore } from "../../store/authStore";
+import SalesCoordinatorOrders from "./Components/SalesCoordinatorOrders";
 
 export default function Main() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -29,8 +30,7 @@ export default function Main() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
-  const userRole = authUser.role;
+  const userRole = useAuthStore((state) => state.user?.role);
 
   const fetchOrders = async (
     page = 1,
@@ -274,7 +274,15 @@ export default function Main() {
               perPage={perPage}
               updateOrderStatus={(id,assignStatus) => updateOrderStatus(id,assignStatus)}
             />
-          ) : (
+          ) : userRole === "sales_coordinator" ? (
+  <SalesCoordinatorOrders
+              orders={orders}
+              loading={loading}
+              currentPage={currentPage}
+              perPage={perPage}
+              updateOrderStatus={(id,assignStatus) => updateOrderStatus(id,assignStatus)}
+            />
+) : (
             <DefaultOrders
               orders={orders}
               loading={loading}

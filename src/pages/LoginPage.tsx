@@ -19,7 +19,9 @@ export default function LoginPage() {
     setLoading(false);
 
     if (success) {
-      toast.success(message || "Login successful");
+      toast.success(message || "Login successful", {
+  duration: 2000, 
+})
       navigate("/dashboard");
     } else {
       toast.error(message || "Invalid credentials, please try again.");

@@ -54,8 +54,23 @@ export default function App() {
                   
                   {/* Customer */}
                   <Route path="list" element={<CustomersList />} />
-                  <Route path="add" element={<AddCustomer />} />
-                  <Route path="edit/:id" element={<EditCustomer />}/>
+                  <Route
+            path="add"
+            element={
+              <ProtectedRoute allowedRoles={["distributor"]}>
+                <AddCustomer />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="edit/:id"
+            element={
+              <ProtectedRoute allowedRoles={["distributor"]}>
+                <EditCustomer />
+              </ProtectedRoute>
+            }
+          />
                 </Routes>
               </Layout>
             </ProtectedRoute>
