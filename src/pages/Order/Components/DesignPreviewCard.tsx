@@ -1,42 +1,98 @@
+import { useState } from "react";
 import { FileText } from "lucide-react";
-import type { OrderForm, DoorPartSize } from "../../../interfaces/common";
+import type {
+  OrderForm,
+  DoorPartSize,
+  SelectOption
+} from "../../../interfaces/common";
+import DesignDetails from "./DesginDetails";
 
 interface Props {
   design: OrderForm;
+
+  // Preview helpers
   getDesignTypeTitle: (id: string | number) => string;
   getFinishingTitle: (id: string | number) => string;
   getDesignCodeTitle: (id: string | number) => string;
   getPanelSize: (id: string | number) => string;
+
   aSectionSizes: DoorPartSize[];
   frameSizes: DoorPartSize[];
+
+  // NEW EDIT MODE PROPS
+  designTypes: SelectOption[];
+  finishings: SelectOption[];
+  panelSizes: SelectOption[];
+  designCodes: SelectOption[];
+  fetchDesignCodes: (id1?: string, id2?: string) => Promise<void>;
+
+  updateDesign: (id: number, updatedData: OrderForm) => void;
 }
 
-export default function DesignPreviewCard({
-  design,
-  getDesignTypeTitle,
-  getFinishingTitle,
-  getDesignCodeTitle,
-  getPanelSize,
-  aSectionSizes,
-  frameSizes,
-}: Props) {
+export default function DesignPreviewCard(props: Props) {
+  const {
+    design,
+    getDesignTypeTitle,
+    getFinishingTitle,
+    getDesignCodeTitle,
+    getPanelSize,
+    aSectionSizes,
+    frameSizes,
+    designTypes,
+    finishings,
+    panelSizes,
+    designCodes,
+    fetchDesignCodes,
+    updateDesign
+  } = props;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<OrderForm>(design);
+  const [errors, setErrors] = useState<any>({});
+
+  // --- EDIT MODE ---
+  if (isEditing) {
+    return (
+      <DesignDetails
+        savedDesigns={[]} // unused here
+        designTypes={designTypes}
+        currentDesign={editData}
+        setCurrentDesign={setEditData}
+        fetchDesignCodes={fetchDesignCodes}
+        setErrors={setErrors}
+        errors={errors}
+        finishings={finishings}
+        designCodes={designCodes}
+        panelSizes={panelSizes}
+        aSectionSizes={aSectionSizes}
+        frameSizes={frameSizes}
+        handleAddDesign={() => {
+          updateDesign(design.id, editData);
+          setIsEditing(false);
+        }}
+      />
+    );
+  }
+
+  // --- PREVIEW MODE ---
   return (
-    <div
-      key={design.id}
-      className="bg-white rounded-lg shadow-md border border-gray-200 p-3"
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+    <div className="bg-white rounded-lg shadow border p-4">
+      <div className="flex items-center justify-between mb-3 border-b pb-2">
         <div className="flex items-center gap-2">
-          <div className="p-1 bg-blue-50 rounded">
-            <FileText className="w-3.5 h-3.5 text-blue-600" />
-          </div>
-          <h2 className="text-base font-semibold text-gray-800">
+          <FileText className="w-4 h-4 text-blue-600" />
+          <h2 className="font-semibold text-gray-700">
             Design Details - SL - 0{design.id}
           </h2>
         </div>
-        <button className="px-2.5 py-1 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors flex items-center gap-1">
-          <span className="text-sm">✎</span> Edit
+
+        <button
+          onClick={() => {
+            setEditData(design); // load existing values
+            setIsEditing(true);
+          }}
+          className="px-2 py-1 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100"
+        >
+          ✎ Edit
         </button>
       </div>
 

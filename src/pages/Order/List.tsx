@@ -74,14 +74,17 @@ export default function Main() {
     }
   };
 
-    const updateOrderStatus = async (orderId: number, newStatus: string) => {
-  confirmAlert(
+  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+    confirmAlert(
       "You want to assign this order!",
       async () => {
         try {
-          const res = await api.post(`/sales/order/update-assign-status/${orderId}`, {
-      assign_status: newStatus,
-    });
+          const res = await api.post(
+            `/sales/order/update-assign-status/${orderId}`,
+            {
+              assign_status: newStatus,
+            }
+          );
           const message = (res.data as { message: string }).message;
           toast.success(message);
           fetchOrders(currentPage);
@@ -93,7 +96,7 @@ export default function Main() {
       },
       () => console.log("Change status cancelled")
     );
-};
+  };
 
   const applyFilters = () => {
     setCurrentPage(1);
@@ -272,17 +275,21 @@ export default function Main() {
               loading={loading}
               currentPage={currentPage}
               perPage={perPage}
-              updateOrderStatus={(id,assignStatus) => updateOrderStatus(id,assignStatus)}
+              updateOrderStatus={(id, assignStatus) =>
+                updateOrderStatus(id, assignStatus)
+              }
             />
           ) : userRole === "sales_coordinator" ? (
-  <SalesCoordinatorOrders
+            <SalesCoordinatorOrders
               orders={orders}
               loading={loading}
               currentPage={currentPage}
               perPage={perPage}
-              updateOrderStatus={(id,assignStatus) => updateOrderStatus(id,assignStatus)}
+              updateOrderStatus={(id, assignStatus) =>
+                updateOrderStatus(id, assignStatus)
+              }
             />
-) : (
+          ) : (
             <DefaultOrders
               orders={orders}
               loading={loading}

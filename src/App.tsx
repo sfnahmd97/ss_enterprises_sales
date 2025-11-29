@@ -16,6 +16,7 @@ import ChangePassword from "./Profile/changePassword";
 import CreateOrder from "./pages/Order/Create";
 import ListOrder from "./pages/Order/List";
 import Details from "./pages/Order/Details";
+import OrderDetailsSalescoordinator from "./pages/Order/OrderDetailsSalescoordinator";
 
 import CustomersList from "./pages/Customer/List";
 import AddCustomer from "./pages/Customer/Add";
@@ -86,6 +87,7 @@ export default function App() {
                   <Route path="create" element={<CreateOrder />} />
                   <Route path="list" element={<ListOrder />} />
                   <Route path="details/:id" element={<Details />}/>
+                  <Route path="details-salescoodinaotr/:id" element={<OrderDetailsSalescoordinator />}/>
                 </Routes>
               </Layout>
             </ProtectedRoute>

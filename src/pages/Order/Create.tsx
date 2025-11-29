@@ -136,6 +136,14 @@ export default function OrderForm() {
     }
   };
 
+  const updateDesign = (designId: number, updatedData: OrderForm) => {
+  setSavedDesigns(prev =>
+    prev.map(d => (d.id === designId ? { ...updatedData, id: designId } : d))
+  );
+
+  toast.success("Design Updated!");
+};
+
   const getDesignTypeTitle = (id: string | number) =>
     designTypes.find((dt) => dt.value === Number(id))?.label || "N/A";
 
@@ -373,6 +381,14 @@ export default function OrderForm() {
             getPanelSize={getPanelSize}
             aSectionSizes={aSectionSizes}
             frameSizes={frameSizes}
+
+             designTypes={designTypes}
+    finishings={finishings}
+    panelSizes={panelSizes}
+    designCodes={designCodes}
+    fetchDesignCodes={fetchDesignCodes}
+
+    updateDesign={updateDesign}
           />
         ))}
 

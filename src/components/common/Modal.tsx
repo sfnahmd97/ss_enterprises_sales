@@ -11,7 +11,7 @@ export default function Modal({
   onClose,
   children,
   title,
-  size = "md", 
+  size = "md",
 }: ModalProps) {
   if (!open) return null;
 
