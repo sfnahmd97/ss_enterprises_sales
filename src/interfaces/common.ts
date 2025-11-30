@@ -71,7 +71,7 @@ interface SectionValues {
   [key: string]: string; // or Record<string, string>
 }
 export interface OrderForm {
-    id?: number;
+    id: number;
     designType: string;
     panelSize: string;
     designNo: string;

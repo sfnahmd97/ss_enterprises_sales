@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomerDetails from "./Components/CustomerDetails";
 import { useNavigate } from "react-router-dom";
+import { confirmAlert } from "../../lib/alertUtils";
 
 import type {
   DoorPartSize,
@@ -17,7 +18,6 @@ import DesignPreviewCard from "./Components/DesignPreviewCard";
 import DesignDetails from "./Components/DesginDetails";
 
 export default function OrderForm() {
-
   const navigate = useNavigate();
 
   const [customers, setCustomers] = useState<SelectOption[]>([]);
@@ -137,12 +137,31 @@ export default function OrderForm() {
   };
 
   const updateDesign = (designId: number, updatedData: OrderForm) => {
-  setSavedDesigns(prev =>
-    prev.map(d => (d.id === designId ? { ...updatedData, id: designId } : d))
-  );
+    setSavedDesigns((prev) =>
+      prev.map((d) =>
+        d.id === designId ? { ...updatedData, id: designId } : d
+      )
+    );
 
-  toast.success("Design Updated!");
-};
+    toast.success("Design Updated!");
+  };
+
+  const removeDesign = (id: number) => {
+    confirmAlert(
+      "You want to remove this design!",
+      async () => {
+        try {
+          setSavedDesigns((prev) => prev.filter((design) => design.id !== id));
+          toast.success("Design removed");
+        } catch (error: any) {
+          console.error("Failed:", error);
+          toast.error("Something went wrong.");
+        } finally {
+        }
+      },
+      () => console.log("Change status cancelled")
+    );
+  };
 
   const getDesignTypeTitle = (id: string | number) =>
     designTypes.find((dt) => dt.value === Number(id))?.label || "N/A";
@@ -208,9 +227,9 @@ export default function OrderForm() {
 
   const [errors, setErrors] = useState<Errors>({});
   const [customerErrors, setCustomerErrors] = useState({
-  customerName: false,
-  deliveryDate: false,
-});
+    customerName: false,
+    deliveryDate: false,
+  });
 
   const handleAddDesign = () => {
     const newErrors: any = {};
@@ -240,78 +259,78 @@ export default function OrderForm() {
       aSection: {},
       frame: {},
     });
-      toast.success("Design Added.");
+    toast.success("Design Added.");
     // ✅ Clear validation errors
     setErrors({});
   };
 
   const handleSubmit = async () => {
-  const { customerName, deliveryDate } = formData;
+    const { customerName, deliveryDate } = formData;
 
-  if (!customerName || !deliveryDate) {
-  setCustomerErrors({
-    customerName: !customerName,
-    deliveryDate: !deliveryDate,
-  });
-  toast.error("Please fill in all customer details!");
-  return;
-}
+    if (!customerName || !deliveryDate) {
+      setCustomerErrors({
+        customerName: !customerName,
+        deliveryDate: !deliveryDate,
+      });
+      toast.error("Please fill in all customer details!");
+      return;
+    }
 
- if (savedDesigns.length === 0) {
-    toast.error("Please add at least one design before submitting!");
-    return;
-  }
+    if (savedDesigns.length === 0) {
+      toast.error("Please add at least one design before submitting!");
+      return;
+    }
 
     console.log("Form submitted:", { formData, savedDesigns });
     const submissionData = {
-    ...formData,
-    designs: savedDesigns,
-  };
+      ...formData,
+      designs: savedDesigns,
+    };
 
     try {
-          const res = await api.post("/sales/order/create", submissionData);
-    
-          const success = (res.data as { success: any[] }).success;
-          const message = (res.data as { message: string }).message;
-    
-          if (success) {
-      const data = (res.data as { data: any }).data;
-      const orderId = data.id;
-            toast.success(message);
-             setFormData({
-        customerName: "",
-        place: "",
-        brand: "",
-        deliveryDate: "",
-      });
+      const res = await api.post("/sales/order/create", submissionData);
 
-      setSavedDesigns([]);
-      setCurrentDesign({
-        id: 0,
-        designType: "",
-        panelSize: "",
-        designNo: "",
-        finishing: "",
-        nos: "",
-        aSection: {},
-        frame: {},
-      });
+      const success = (res.data as { success: any[] }).success;
+      const message = (res.data as { message: string }).message;
 
-      setErrors({});
-            navigate("/orders/details/"+orderId);
-          } else {
-            toast.error("Something went wrong");
-          }
-        } catch (error: any) {
-          console.log("error: "+error);
-          if (error.response?.data?.errors) {
-            const formatted: any = {};
-            Object.keys(error.response.data.errors).forEach(
-              (f) => (formatted[f] = error.response.data.errors[f][0])
-            );
-            setErrors(formatted);
-          } else toast.error("Server error");
-        }
+      if (success) {
+        const data = (res.data as { data: any }).data;
+        const orderId = data.id;
+        toast.success(message);
+        setFormData({
+          customerName: "",
+          place: "",
+          brand: "",
+          deliveryDate: "",
+        });
+
+        setSavedDesigns([]);
+        setCurrentDesign({
+          id: 0,
+          designType: "",
+          panelSize: "",
+          designNo: "",
+          finishing: "",
+          nos: "",
+          aSection: {},
+          frame: {},
+        });
+
+        setErrors({});
+        navigate("/orders/details/" + orderId);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (error: any) {
+      console.log("error: " + error);
+      if (error.response?.data?.errors) {
+        const formatted: any = {};
+        Object.keys(error.response.data.errors).forEach(
+          (f) => (formatted[f] = error.response.data.errors[f][0])
+        );
+        setErrors(formatted);
+      } else toast.error("Server error");
+    }
   };
 
   if (loading) {
@@ -344,7 +363,7 @@ export default function OrderForm() {
             <h2 className="text-lg font-semibold">Order Form</h2>
           </div>
 
-{/* Customer Form */}
+          {/* Customer Form */}
           <CustomerDetails
             customers={customers}
             formData={formData}
@@ -355,20 +374,20 @@ export default function OrderForm() {
 
         {/* 2. Design Details Input Section */}
         <DesignDetails
-            savedDesigns={savedDesigns}
-            designTypes={designTypes}
-            currentDesign={currentDesign}
-            setCurrentDesign={setCurrentDesign}
-            fetchDesignCodes={fetchDesignCodes}
-            setErrors={setErrors}
-            errors={errors}
-            finishings={finishings}
-            designCodes={designCodes}
-            panelSizes={panelSizes}
-            aSectionSizes={aSectionSizes}
-            frameSizes={frameSizes}
-            handleAddDesign={handleAddDesign}
-          />
+          savedDesigns={savedDesigns}
+          designTypes={designTypes}
+          currentDesign={currentDesign}
+          setCurrentDesign={setCurrentDesign}
+          fetchDesignCodes={fetchDesignCodes}
+          setErrors={setErrors}
+          errors={errors}
+          finishings={finishings}
+          designCodes={designCodes}
+          panelSizes={panelSizes}
+          aSectionSizes={aSectionSizes}
+          frameSizes={frameSizes}
+          handleAddDesign={handleAddDesign}
+        />
 
         {/* Saved Designs Display Section (Dynamic View) */}
         {savedDesigns.map((design) => (
@@ -381,14 +400,13 @@ export default function OrderForm() {
             getPanelSize={getPanelSize}
             aSectionSizes={aSectionSizes}
             frameSizes={frameSizes}
-
-             designTypes={designTypes}
-    finishings={finishings}
-    panelSizes={panelSizes}
-    designCodes={designCodes}
-    fetchDesignCodes={fetchDesignCodes}
-
-    updateDesign={updateDesign}
+            designTypes={designTypes}
+            finishings={finishings}
+            panelSizes={panelSizes}
+            designCodes={designCodes}
+            fetchDesignCodes={fetchDesignCodes}
+            updateDesign={updateDesign}
+            removeDesign={removeDesign}
           />
         ))}
 

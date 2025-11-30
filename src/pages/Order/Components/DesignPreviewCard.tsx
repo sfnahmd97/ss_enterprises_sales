@@ -27,6 +27,7 @@ interface Props {
   fetchDesignCodes: (id1?: string, id2?: string) => Promise<void>;
 
   updateDesign: (id: number, updatedData: OrderForm) => void;
+  removeDesign: (id: number) => void;
 }
 
 export default function DesignPreviewCard(props: Props) {
@@ -43,7 +44,8 @@ export default function DesignPreviewCard(props: Props) {
     panelSizes,
     designCodes,
     fetchDesignCodes,
-    updateDesign
+    updateDesign,
+    removeDesign,
   } = props;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -78,23 +80,33 @@ export default function DesignPreviewCard(props: Props) {
   return (
     <div className="bg-white rounded-lg shadow border p-4">
       <div className="flex items-center justify-between mb-3 border-b pb-2">
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-blue-600" />
-          <h2 className="font-semibold text-gray-700">
-            Design Details - SL - 0{design.id}
-          </h2>
-        </div>
+  <div className="flex items-center gap-2">
+    <FileText className="w-4 h-4 text-blue-600" />
+    <h2 className="font-semibold text-gray-700">
+      Design Details - SL - 0{design.id}
+    </h2>
+  </div>
 
-        <button
-          onClick={() => {
-            setEditData(design); // load existing values
-            setIsEditing(true);
-          }}
-          className="px-2 py-1 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100"
-        >
-          ✎ Edit
-        </button>
-      </div>
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => {
+        setEditData(design);
+        setIsEditing(true);
+      }}
+      className="px-2 py-1 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100"
+    >
+      ✎ Edit
+    </button>
+
+    <button
+      onClick={() => removeDesign(design.id)}
+      className="px-2 py-1 text-xs text-red-600 bg-red-50 rounded hover:bg-red-100"
+    >
+      🗑 Remove
+    </button>
+  </div>
+</div>
+
 
       <div className="space-y-2">
         {/* Row 1: Basic Information */}
