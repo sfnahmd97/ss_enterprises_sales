@@ -1,3 +1,5 @@
+import { Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useNavigate} from "react-router-dom";
 
 
@@ -43,9 +45,9 @@ export default function DefaultOrders({
                   <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Created At
                   </th>
-                  {/* <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Action
-                  </th> */}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -104,17 +106,21 @@ export default function DefaultOrders({
                           year: "numeric"
                         })}
                       </td>
-                      {/* <td className="px-6 py-4 text-center"
+                      <td className="px-6 py-4 text-center"
                       onClick={(e) => e.stopPropagation()}
                       >
+                        {val.assign_status === "not_assigned" ? (
                         <Link
-                        to={`/orders/details/${val.id}`}
-                        className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+                        to={`/orders/edit/${val.id}`}
+                        className="inline-flex items-center justify-center p-2 bg-gray-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
                         title="Edit"
                       >
-                        <Eye size={16} />
+                        <Pencil size={16} />
                       </Link>
-                      </td> */}
+                      ) : (
+                      "Not Editable"
+                    )}
+                      </td>
                     </tr>
                   ))
                 ) : (

@@ -68,7 +68,7 @@ export interface UserData {
 }
 
 interface SectionValues {
-  [key: string]: string; // or Record<string, string>
+  [key: string]: number | string; // or Record<string, string>
 }
 export interface OrderForm {
     id: number;

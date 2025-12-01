@@ -58,7 +58,7 @@ export default function CustomerDetails({
         <Select
           options={customers}
           value={
-            customers.find((opt) => opt.label === formData.customerName) || null
+            customers.find((opt) => opt.value === formData.customerId) || null
           }
           onChange={handleCustomerChange}
           placeholder="Select a Customer"

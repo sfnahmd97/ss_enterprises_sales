@@ -13,7 +13,7 @@ import EditProfile from "./Profile/EditProfile";
 import ChangePassword from "./Profile/changePassword";
 
 {/* Order */}
-import CreateOrder from "./pages/Order/Create";
+import OrderMaster from "./pages/Order/OrderFormMaster";
 import ListOrder from "./pages/Order/List";
 import Details from "./pages/Order/Details";
 import OrderDetailsSalescoordinator from "./pages/Order/OrderDetailsSalescoordinator";
@@ -84,7 +84,8 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <Routes>
-                  <Route path="create" element={<CreateOrder />} />
+                  <Route path="create" element={<OrderMaster mode="create" />} />
+                  <Route path="edit/:id" element={<OrderMaster mode="edit" />} />
                   <Route path="list" element={<ListOrder />} />
                   <Route path="details/:id" element={<Details />}/>
                   <Route path="details-salescoodinaotr/:id" element={<OrderDetailsSalescoordinator />}/>

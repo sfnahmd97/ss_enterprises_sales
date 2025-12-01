@@ -1,3 +1,5 @@
+import { Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -132,13 +134,13 @@ export default function SalesManagerOrders({
                   className="px-6 py-4 text-center"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* <Link
-                        to={`/orders/details/${val.id}`}
-                        className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+                  <Link
+                        to={`/orders/edit/${val.id}`}
+                        className="inline-flex items-center justify-center p-2 bg-gray-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
                         title="Edit"
                       >
-                        <Eye size={16} />
-                      </Link> */}
+                        <Pencil size={16} />
+                      </Link>
 
                   <td
                     className="px-6 py-4 text-center"

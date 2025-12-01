@@ -114,10 +114,6 @@ export default function Main() {
 
   const hasActiveFilters = statusFilter || startDate || endDate;
 
-  // useEffect(() => {
-  //   fetchOrders(currentPage, searchTerm, statusFilter, startDate, endDate);
-  // }, [currentPage]);
-
   useEffect(() => {
     const statusFromURL = searchParams.get("status");
 
