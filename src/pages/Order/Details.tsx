@@ -390,18 +390,28 @@ const OrderDetailPage: React.FC = () => {
                     <div className="space-y-2">
                       {/* Row 1: Basic Information */}
                       <div className="grid grid-cols-5 gap-3">
-                        <div className="bg-gray-50 rounded p-1.5">
-                          <div className="text-xs text-gray-500 mb-0.5">Design Type</div>
+
+                      <div className="bg-gray-50 rounded p-1.5">
+                          <div className="text-xs text-gray-500 mb-0.5">Design</div>
                           <div className="text-sm font-semibold text-gray-800">
-                            {design.design_type.title}
+                            {design.design_code || "N/A"}
                           </div>
                         </div>
+
                         <div className="bg-gray-50 rounded p-1.5">
                           <div className="text-xs text-gray-500 mb-0.5">Finishing</div>
                           <div className="text-sm font-semibold text-gray-800">
                             {design.finishing.title}
                           </div>
                         </div>
+
+                        <div className="bg-gray-50 rounded p-1.5">
+                          <div className="text-xs text-gray-500 mb-0.5">Design Type</div>
+                          <div className="text-sm font-semibold text-gray-800">
+                            {design.design_type.title}
+                          </div>
+                        </div>
+                        
                         <div className="bg-gray-50 rounded p-1.5">
                           <div className="text-xs text-gray-500 mb-0.5">Panel Size</div>
                           <div className="text-sm font-semibold text-gray-800">
@@ -414,12 +424,7 @@ const OrderDetailPage: React.FC = () => {
                             {design.nos || "0"}
                           </div>
                         </div>
-                        <div className="bg-gray-50 rounded p-1.5">
-                          <div className="text-xs text-gray-500 mb-0.5">Design No</div>
-                          <div className="text-sm font-semibold text-gray-800">
-                            {design.design_code || "N/A"}
-                          </div>
-                        </div>
+                        
                       </div>
 
                       {/* Row 2: A Section */}
