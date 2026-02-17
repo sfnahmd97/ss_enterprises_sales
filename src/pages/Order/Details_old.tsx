@@ -351,88 +351,137 @@ const OrderDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Section Header */}
-<div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 overflow-hidden">
-  <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4">
-    <div className="flex items-center justify-between">
-      <h2 className="text-xl font-bold text-white flex items-center gap-2">
-        <Package className="w-5 h-5" />
-        Order Designs
-      </h2>
-      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-semibold">
-        {order_designs.length} {order_designs.length === 1 ? 'Design' : 'Designs'}
-      </span>
-    </div>
-  </div>
+        {/* Order Designs Section */}
+        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 overflow-hidden">
+          
+          {/* Section Header */}
+          <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Order Designs
+              </h2>
+              <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-semibold">
+                {order_designs.length} {order_designs.length === 1 ? 'Design' : 'Designs'}
+              </span>
+            </div>
+          </div>
 
-  <div className="p-6">
-    {order_designs.length > 0 ? (
-      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Design</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Finishing</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Design Type</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Panel Size</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Panel Nos</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">A Section</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Frame</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {order_designs.map((design, index) => (
-              <tr key={design.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-400 font-medium">{index + 1}</td>
-                <td className="px-4 py-3 font-semibold text-gray-800">{design.design_code || "N/A"}</td>
-                <td className="px-4 py-3 text-gray-700">{design.finishing.title}</td>
-                <td className="px-4 py-3 text-gray-700">{design.design_type.title}</td>
-                <td className="px-4 py-3 text-gray-700">{design.panel_size.size}</td>
-                <td className="px-4 py-3 text-gray-700">{design.nos || "0"}</td>
+          <div className="p-6">
+            {order_designs.length > 0 ? (
+              <div className="space-y-4">
+                {order_designs.map((design, index) => (
+                  <div
+                    key={design.id}
+                    className="bg-white rounded-lg shadow-md border border-gray-200 p-3"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 bg-blue-50 rounded">
+                          <FileText className="w-3.5 h-3.5 text-blue-600" />
+                        </div>
+                        <h2 className="text-base font-semibold text-gray-800">
+                          Design Details - {index+1}
+                        </h2>
+                      </div>
+                    </div>
 
-                {/* A Sections */}
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {design.a_sections.map((section) => (
-                      <span
-                        key={section.id}
-                        className="inline-flex flex-col items-center bg-blue-50 border border-blue-100 rounded px-2 py-0.5 text-xs"
-                      >
-                        <span className="text-gray-400">{section.size}</span>
-                        <span className="font-bold text-blue-700">{section.quantity}</span>
-                      </span>
-                    ))}
+                    <div className="space-y-2">
+                      {/* Row 1: Basic Information */}
+                      <div className="grid grid-cols-5 gap-3">
+
+                      <div className="bg-gray-50 rounded p-1.5">
+                          <div className="text-xs text-gray-500 mb-0.5">Design</div>
+                          <div className="text-sm font-semibold text-gray-800">
+                            {design.design_code || "N/A"}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded p-1.5">
+                          <div className="text-xs text-gray-500 mb-0.5">Finishing</div>
+                          <div className="text-sm font-semibold text-gray-800">
+                            {design.finishing.title}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded p-1.5">
+                          <div className="text-xs text-gray-500 mb-0.5">Design Type</div>
+                          <div className="text-sm font-semibold text-gray-800">
+                            {design.design_type.title}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 rounded p-1.5">
+                          <div className="text-xs text-gray-500 mb-0.5">Panel Size</div>
+                          <div className="text-sm font-semibold text-gray-800">
+                            {design.panel_size.size}
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 rounded p-1.5">
+                          <div className="text-xs text-gray-500 mb-0.5">Panel Nos</div>
+                          <div className="text-sm font-semibold text-gray-800">
+                            {design.nos || "0"}
+                          </div>
+                        </div>
+                        
+                      </div>
+
+                      {/* Row 2: A Section */}
+                      <div className="bg-gradient-to-r from-blue-50 to-transparent rounded p-2">
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs font-semibold text-gray-700 min-w-[70px]">
+                            A Section:
+                          </div>
+                          <div className="flex gap-3 flex-wrap">
+                            {design.a_sections.map((section) => (
+                              <div
+                                key={section.id}
+                                className="flex flex-col items-center bg-white rounded p-1.5 min-w-[50px] shadow-sm"
+                              >
+                                <span className="text-xs text-gray-500">{section.size}</span>
+                                <span className="text-sm font-bold text-gray-800">
+                                  {section.quantity}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 3: Frame */}
+                      <div className="bg-gradient-to-r from-green-50 to-transparent rounded p-2">
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs font-semibold text-gray-700 min-w-[70px]">
+                            Frame:
+                          </div>
+                          <div className="flex gap-3 flex-wrap">
+                            {design.frames.map((frame) => (
+                              <div
+                                key={frame.id}
+                                className="flex flex-col items-center bg-white rounded p-1.5 min-w-[50px] shadow-sm"
+                              >
+                                <span className="text-xs text-gray-500">{frame.size}</span>
+                                <span className="text-sm font-bold text-gray-800">
+                                  {frame.quantity}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </td>
-
-                {/* Frames */}
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {design.frames.map((frame) => (
-                      <span
-                        key={frame.id}
-                        className="inline-flex flex-col items-center bg-green-50 border border-green-100 rounded px-2 py-0.5 text-xs"
-                      >
-                        <span className="text-gray-400">{frame.size}</span>
-                        <span className="font-bold text-green-700">{frame.quantity}</span>
-                      </span>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div className="text-center py-12 text-gray-500">
-        <Package className="w-16 h-16 mx-auto mb-3 opacity-30" />
-        <p className="text-lg font-medium">No designs found for this order</p>
-      </div>
-    )}
-  </div>
-</div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Package className="w-16 h-16 mx-auto mb-3 opacity-30" />
+                <p className="text-lg font-medium">No designs found for this order</p>
+              </div>
+            )}
+          </div>
+        </div>
 
       </div>
 
