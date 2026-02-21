@@ -14,7 +14,6 @@ import {
   Loader,
   Check,
   AlertCircle,
-  FileText,
   Clock,
 } from "lucide-react";
 import api from "../../lib/axios";
@@ -166,6 +165,38 @@ const getStatusIcon = (status?: string): React.ReactElement => {
 };
 
 // --------------------------------------------
+// Fixed column definitions with cumulative left offsets
+// Adjust widths to match your actual rendered column widths.
+// --------------------------------------------
+const FIXED_COLS = [
+  { label: "#",           width: 48  },
+  { label: "Design",      width: 120 },
+  { label: "Design Type", width: 140 },
+  { label: "Finishing",   width: 120 },
+  { label: "Panel Size",  width: 110 },
+  { label: "Panel Nos",   width: 100 },
+];
+
+// Pre-compute cumulative left values
+const fixedColMeta = FIXED_COLS.reduce<{ label: string; width: number; left: number }[]>(
+  (acc, col, i) => {
+    const left = i === 0 ? 0 : acc[i - 1].left + acc[i - 1].width;
+    acc.push({ ...col, left });
+    return acc;
+  },
+  []
+);
+
+// Shared sticky th/td styles
+// const stickyTh = (left: number, width: number, extra = "") =>
+//   `sticky bg-gray-50 z-20 px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${extra}`
+//     + ` after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-gray-200`;
+
+// const stickyTd = (left: number, extra = "") =>
+//   `sticky bg-white z-10 px-4 py-3 whitespace-nowrap ${extra}`
+//     + ` after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-gray-100`;
+
+// --------------------------------------------
 // 🟦 MAIN COMPONENT (TSX)
 // --------------------------------------------
 
@@ -202,7 +233,6 @@ const OrderDetailPage: React.FC = () => {
     }
   }, [id]);
 
-  // Loading State
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
@@ -214,7 +244,6 @@ const OrderDetailPage: React.FC = () => {
     );
   }
 
-  // Error State - if no data after loading
   if (!orderData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
@@ -236,6 +265,17 @@ const OrderDetailPage: React.FC = () => {
 
   const { order, customer, order_designs } = orderData;
 
+  // Collect all unique dynamic sizes
+  const allSectionSizes = Array.from(
+    new Set(order_designs.flatMap((d) => d.a_sections.map((s) => s.size)))
+  );
+  const allFrameSizes = Array.from(
+    new Set(order_designs.flatMap((d) => d.frames.map((f) => f.size)))
+  );
+
+  // Last fixed column's right edge = total fixed width
+  const totalFixedWidth = fixedColMeta[fixedColMeta.length - 1].left + fixedColMeta[fixedColMeta.length - 1].width;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
 
@@ -246,7 +286,6 @@ const OrderDetailPage: React.FC = () => {
         <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
-      {/* Content */}
       <div className="relative max-w-7xl mx-auto">
 
         {/* Breadcrumb */}
@@ -267,22 +306,17 @@ const OrderDetailPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Details</h1>
               <p className="text-lg text-gray-600">Order #{order.code}</p>
             </div>
-
             <span
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border-2 ${getStatusColor(
-                order.status
-              )}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border-2 ${getStatusColor(order.status)}`}
             >
               {getStatusIcon(order.status)}
               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
             </span>
           </div>
 
-          {/* Order Info Section */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               
-              {/* Customer Name */}
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center flex-shrink-0">
                   <User className="w-5 h-5 text-white" />
@@ -294,7 +328,6 @@ const OrderDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Location */}
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-emerald-400 flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-5 h-5 text-white" />
@@ -306,7 +339,6 @@ const OrderDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Order Date */}
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center flex-shrink-0">
                   <Calendar className="w-5 h-5 text-white" />
@@ -314,22 +346,14 @@ const OrderDetailPage: React.FC = () => {
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Order Date</p>
                   <p className="font-semibold text-gray-900">
-                    {new Date(order.created_at).toLocaleDateString("en-IN", {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
+                    {new Date(order.created_at).toLocaleDateString("en-IN", { year: 'numeric', month: 'short', day: 'numeric' })}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {new Date(order.created_at).toLocaleTimeString("en-IN", {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {new Date(order.created_at).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
 
-              {/* Delivery Date */}
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
                   <Truck className="w-5 h-5 text-white" />
@@ -337,11 +361,7 @@ const OrderDetailPage: React.FC = () => {
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Delivery Date</p>
                   <p className="font-semibold text-gray-900">
-                    {new Date(order.delivery_date).toLocaleDateString("en-IN", {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
+                    {new Date(order.delivery_date).toLocaleDateString("en-IN", { year: 'numeric', month: 'short', day: 'numeric' })}
                   </p>
                   <p className="text-xs text-gray-500">Expected</p>
                 </div>
@@ -351,92 +371,169 @@ const OrderDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Section Header */}
-<div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 overflow-hidden">
-  <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4">
-    <div className="flex items-center justify-between">
-      <h2 className="text-xl font-bold text-white flex items-center gap-2">
-        <Package className="w-5 h-5" />
-        Order Designs
-      </h2>
-      <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-semibold">
-        {order_designs.length} {order_designs.length === 1 ? 'Design' : 'Designs'}
-      </span>
-    </div>
-  </div>
+        {/* Order Designs Table */}
+        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Order Designs
+              </h2>
+              <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-semibold">
+                {order_designs.length} {order_designs.length === 1 ? 'Design' : 'Designs'}
+              </span>
+            </div>
+          </div>
 
-  <div className="p-6">
-    {order_designs.length > 0 ? (
-      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Design</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Finishing</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Design Type</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Panel Size</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Panel Nos</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">A Section</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Frame</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {order_designs.map((design, index) => (
-              <tr key={design.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-400 font-medium">{index + 1}</td>
-                <td className="px-4 py-3 font-semibold text-gray-800">{design.design_code || "N/A"}</td>
-                <td className="px-4 py-3 text-gray-700">{design.finishing.title}</td>
-                <td className="px-4 py-3 text-gray-700">{design.design_type.title}</td>
-                <td className="px-4 py-3 text-gray-700">{design.panel_size.size}</td>
-                <td className="px-4 py-3 text-gray-700">{design.nos || "0"}</td>
+          <div className="p-6">
+            {order_designs.length > 0 ? (
+              /**
+               * The outer wrapper is the scroll container.
+               * `overflow-x-auto` enables horizontal scrolling.
+               * The table uses `border-separate border-spacing-0` so sticky
+               * cells with borders behave correctly.
+               */
+              <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                <table className="text-sm border-separate border-spacing-0" style={{ minWidth: totalFixedWidth + allSectionSizes.length * 80 + allFrameSizes.length * 80 }}>
+                  <thead>
+                    {/* ── Row 1: group headers ── */}
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      {/* Fixed column headers (rowSpan=2 to span both header rows) */}
+                      {fixedColMeta.map((col) => (
+                        <th
+                          key={col.label}
+                          rowSpan={2}
+                          style={{ left: col.left, minWidth: col.width, width: col.width }}
+                          className="sticky bg-gray-50 z-20 text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap border-b border-r border-gray-200 align-middle"
+                        >
+                          {col.label}
+                        </th>
+                      ))}
 
-                {/* A Sections */}
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {design.a_sections.map((section) => (
-                      <span
-                        key={section.id}
-                        className="inline-flex flex-col items-center bg-blue-50 border border-blue-100 rounded px-2 py-0.5 text-xs"
-                      >
-                        <span className="text-gray-400">{section.size}</span>
-                        <span className="font-bold text-blue-700">{section.quantity}</span>
-                      </span>
-                    ))}
-                  </div>
-                </td>
+                      {/* A Section group header */}
+                      {allSectionSizes.length > 0 && (
+                        <th
+                          colSpan={allSectionSizes.length}
+                          className="text-center px-4 py-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider border-b border-l border-gray-200 bg-indigo-50/60 whitespace-nowrap"
+                        >
+                          A Section
+                        </th>
+                      )}
 
-                {/* Frames */}
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {design.frames.map((frame) => (
-                      <span
-                        key={frame.id}
-                        className="inline-flex flex-col items-center bg-green-50 border border-green-100 rounded px-2 py-0.5 text-xs"
-                      >
-                        <span className="text-gray-400">{frame.size}</span>
-                        <span className="font-bold text-green-700">{frame.quantity}</span>
-                      </span>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      {/* Frame group header */}
+                      {allFrameSizes.length > 0 && (
+                        <th
+                          colSpan={allFrameSizes.length}
+                          className="text-center px-4 py-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider border-b border-l border-gray-200 bg-emerald-50/60 whitespace-nowrap"
+                        >
+                          Frame
+                        </th>
+                      )}
+                    </tr>
+
+                    {/* ── Row 2: size sub-headers (dynamic only) ── */}
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      {allSectionSizes.map((size, i) => (
+                        <th
+                          key={size}
+                          style={{ minWidth: 80 }}
+                          className={`px-3 py-1.5 text-center text-xs font-medium text-indigo-500 bg-indigo-50/40 border-b whitespace-nowrap ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                        >
+                          {size}
+                        </th>
+                      ))}
+                      {allFrameSizes.map((size, i) => (
+                        <th
+                          key={size}
+                          style={{ minWidth: 80 }}
+                          className={`px-3 py-1.5 text-center text-xs font-medium text-emerald-500 bg-emerald-50/40 border-b whitespace-nowrap ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                        >
+                          {size}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-gray-100">
+                    {order_designs.map((design, index) => {
+                      const sectionMap = Object.fromEntries(
+                        design.a_sections.map((s) => [s.size, s.quantity])
+                      );
+                      const frameMap = Object.fromEntries(
+                        design.frames.map((f) => [f.size, f.quantity])
+                      );
+
+                      const rowValues: (string | number)[] = [
+                        index + 1,
+                        design.design_code || "N/A",
+                        design.design_type.title,
+                        design.finishing.title,
+                        design.panel_size.size,
+                        design.nos ?? "0",
+                      ];
+
+                      return (
+                        <tr key={design.id} className="hover:bg-blue-50/30 transition-colors group">
+                          {/* ── Sticky fixed cells ── */}
+                          {fixedColMeta.map((col, ci) => (
+                            <td
+                              key={col.label}
+                              style={{ left: col.left, minWidth: col.width, width: col.width }}
+                              className={`sticky z-10 bg-white group-hover:bg-blue-50/30 px-4 py-3 whitespace-nowrap border-r border-gray-100 transition-colors ${ci === 0 ? "text-gray-400 font-medium" : ci === 1 ? "font-semibold text-gray-800" : "text-gray-700"}`}
+                            >
+                              {rowValues[ci]}
+                            </td>
+                          ))}
+
+                          {/* ── Scrollable: A Section quantity cells ── */}
+                          {allSectionSizes.map((size, i) => (
+                            <td
+                              key={size}
+                              className={`px-3 py-3 text-center ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                            >
+                              {sectionMap[size] != null ? (
+                                <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold text-xs">
+                                  {sectionMap[size]}
+                                </span>
+                              ) : (
+                                <span className="text-gray-300 text-xs">—</span>
+                              )}
+                            </td>
+                          ))}
+
+                          {/* ── Scrollable: Frame quantity cells ── */}
+                          {allFrameSizes.map((size, i) => (
+                            <td
+                              key={size}
+                              className={`px-3 py-3 text-center ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                            >
+                              {frameMap[size] != null ? (
+                                <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold text-xs">
+                                  {frameMap[size]}
+                                </span>
+                              ) : (
+                                <span className="text-gray-300 text-xs">—</span>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Package className="w-16 h-16 mx-auto mb-3 opacity-30" />
+                <p className="text-lg font-medium">No designs found for this order</p>
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
-    ) : (
-      <div className="text-center py-12 text-gray-500">
-        <Package className="w-16 h-16 mx-auto mb-3 opacity-30" />
-        <p className="text-lg font-medium">No designs found for this order</p>
-      </div>
-    )}
-  </div>
-</div>
 
-      </div>
-
-      {/* Blob Animations */}
+      {/* Blob Animations + Custom Scrollbar */}
       <style>{`
         @keyframes blob {
           0%, 100% { transform: translate(0, 0) scale(1); }
@@ -446,6 +543,26 @@ const OrderDetailPage: React.FC = () => {
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Custom thin scrollbar */
+        .overflow-x-auto::-webkit-scrollbar {
+          height: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 999px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        /* Firefox */
+        .overflow-x-auto {
+          scrollbar-width: thin;
+          scrollbar-color: #cbd5e1 transparent;
+        }
       `}</style>
     </div>
   );
