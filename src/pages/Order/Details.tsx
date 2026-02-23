@@ -187,15 +187,6 @@ const fixedColMeta = FIXED_COLS.reduce<{ label: string; width: number; left: num
   []
 );
 
-// Shared sticky th/td styles
-// const stickyTh = (left: number, width: number, extra = "") =>
-//   `sticky bg-gray-50 z-20 px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${extra}`
-//     + ` after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-gray-200`;
-
-// const stickyTd = (left: number, extra = "") =>
-//   `sticky bg-white z-10 px-4 py-3 whitespace-nowrap ${extra}`
-//     + ` after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-gray-100`;
-
 // --------------------------------------------
 // 🟦 MAIN COMPONENT (TSX)
 // --------------------------------------------
@@ -272,9 +263,6 @@ const OrderDetailPage: React.FC = () => {
   const allFrameSizes = Array.from(
     new Set(order_designs.flatMap((d) => d.frames.map((f) => f.size)))
   );
-
-  // Last fixed column's right edge = total fixed width
-  const totalFixedWidth = fixedColMeta[fixedColMeta.length - 1].left + fixedColMeta[fixedColMeta.length - 1].width;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
@@ -394,17 +382,33 @@ const OrderDetailPage: React.FC = () => {
                * cells with borders behave correctly.
                */
               <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-                <table className="text-sm border-separate border-spacing-0" style={{ minWidth: totalFixedWidth + allSectionSizes.length * 80 + allFrameSizes.length * 80 }}>
+                <table
+                  className="text-sm border-separate border-spacing-0"
+                 style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}
+                >
+                  {/* colgroup enforces exact widths — most reliable cross-browser approach */}
+                  <colgroup>
+                    {fixedColMeta.map((col) => (
+                      <col key={col.label} style={{ width: col.width }} />
+                    ))}
+                    {allSectionSizes.map((size) => (
+                      <col key={`sec-${size}`} style={{ width: 130 }} />
+                    ))}
+                    {allFrameSizes.map((size) => (
+                      <col key={`frm-${size}`} style={{ width: 130 }} />
+                    ))}
+                  </colgroup>
+
                   <thead>
                     {/* ── Row 1: group headers ── */}
-                    <tr className="bg-gray-50 border-b border-gray-200">
+                    <tr className="bg-gray-50">
                       {/* Fixed column headers (rowSpan=2 to span both header rows) */}
                       {fixedColMeta.map((col) => (
                         <th
                           key={col.label}
                           rowSpan={2}
-                          style={{ left: col.left, minWidth: col.width, width: col.width }}
-                          className="sticky bg-gray-50 z-20 text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap border-b border-r border-gray-200 align-middle"
+                          style={{ left: col.left }}
+                          className="sticky bg-gray-50 z-20 text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap border-b-2 border-b-gray-200 border-r border-r-gray-200 align-middle"
                         >
                           {col.label}
                         </th>
@@ -414,7 +418,7 @@ const OrderDetailPage: React.FC = () => {
                       {allSectionSizes.length > 0 && (
                         <th
                           colSpan={allSectionSizes.length}
-                          className="text-center px-4 py-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider border-b border-l border-gray-200 bg-indigo-50/60 whitespace-nowrap"
+                          className="text-center px-4 py-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider border-b border-b-indigo-200 border-l border-l-gray-200 bg-indigo-50/60"
                         >
                           A Section
                         </th>
@@ -424,7 +428,7 @@ const OrderDetailPage: React.FC = () => {
                       {allFrameSizes.length > 0 && (
                         <th
                           colSpan={allFrameSizes.length}
-                          className="text-center px-4 py-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider border-b border-l border-gray-200 bg-emerald-50/60 whitespace-nowrap"
+                          className="text-center px-4 py-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider border-b border-b-emerald-200 border-l border-l-gray-200 bg-emerald-50/60"
                         >
                           Frame
                         </th>
@@ -432,12 +436,11 @@ const OrderDetailPage: React.FC = () => {
                     </tr>
 
                     {/* ── Row 2: size sub-headers (dynamic only) ── */}
-                    <tr className="bg-gray-50 border-b border-gray-200">
+                    <tr className="bg-gray-50">
                       {allSectionSizes.map((size, i) => (
                         <th
                           key={size}
-                          style={{ minWidth: 80 }}
-                          className={`px-3 py-1.5 text-center text-xs font-medium text-indigo-500 bg-indigo-50/40 border-b whitespace-nowrap ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                          className={`px-3 py-2 text-center text-xs font-medium text-indigo-500 bg-indigo-50/40 border-b-2 border-b-gray-200 whitespace-nowrap overflow-hidden text-ellipsis ${i === 0 ? "border-l border-l-gray-200" : "border-l border-l-gray-100"}`}
                         >
                           {size}
                         </th>
@@ -445,8 +448,7 @@ const OrderDetailPage: React.FC = () => {
                       {allFrameSizes.map((size, i) => (
                         <th
                           key={size}
-                          style={{ minWidth: 80 }}
-                          className={`px-3 py-1.5 text-center text-xs font-medium text-emerald-500 bg-emerald-50/40 border-b whitespace-nowrap ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                          className={`px-3 py-2 text-center text-xs font-medium text-emerald-500 bg-emerald-50/40 border-b-2 border-b-gray-200 whitespace-nowrap overflow-hidden text-ellipsis ${i === 0 ? "border-l border-l-gray-200" : "border-l border-l-gray-100"}`}
                         >
                           {size}
                         </th>
@@ -478,7 +480,7 @@ const OrderDetailPage: React.FC = () => {
                           {fixedColMeta.map((col, ci) => (
                             <td
                               key={col.label}
-                              style={{ left: col.left, minWidth: col.width, width: col.width }}
+                              style={{ left: col.left }}
                               className={`sticky z-10 bg-white group-hover:bg-blue-50/30 px-4 py-3 whitespace-nowrap border-r border-gray-100 transition-colors ${ci === 0 ? "text-gray-400 font-medium" : ci === 1 ? "font-semibold text-gray-800" : "text-gray-700"}`}
                             >
                               {rowValues[ci]}

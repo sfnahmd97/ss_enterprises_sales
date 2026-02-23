@@ -6,6 +6,7 @@ import type {
   SelectOption
 } from "../../../interfaces/common";
 import DesignDetails from "./DesginDetails";
+import api from "../../../lib/axios";
 
 interface Props {
   design: OrderForm;
@@ -28,14 +29,15 @@ interface Props {
 
   updateDesign: (id: number, updatedData: OrderForm) => void;
   removeDesign: (id: number) => void;
+  
 }
+
 
 export default function DesignPreviewCard(props: Props) {
   const {
     design,
     getDesignTypeTitle,
     getFinishingTitle,
-    getDesignCodeTitle,
     getPanelSize,
     aSectionSizes,
     frameSizes,
@@ -43,7 +45,6 @@ export default function DesignPreviewCard(props: Props) {
     finishings,
     panelSizes,
     designCodes,
-    fetchDesignCodes,
     updateDesign,
     removeDesign,
   } = props;
@@ -51,6 +52,21 @@ export default function DesignPreviewCard(props: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<OrderForm>(design);
   const [errors, setErrors] = useState<any>({});
+
+    const [localDesignCodes, setLocalDesignCodes] = useState<SelectOption[]>(designCodes);
+
+  const fetchLocalDesignCodes = async (id1?: string, id2?: string) => {
+    try {
+      const res = await api.get(`sales/get-designs/${id1 || ""}/${id2 || ""}`);
+      const data = (res.data as { data: any[] }).data;
+      setLocalDesignCodes(data.map((d: any) => ({ value: d.id, label: d.design_code })));
+    } catch {
+      setLocalDesignCodes([]);
+    }
+  };
+
+  const getLocalDesignCodeTitle = (id: string | number) =>
+    localDesignCodes.find((dc) => dc.value === Number(id))?.label || "N/A";
 
   // --- EDIT MODE ---
   if (isEditing) {
@@ -60,11 +76,11 @@ export default function DesignPreviewCard(props: Props) {
         designTypes={designTypes}
         currentDesign={editData}
         setCurrentDesign={setEditData}
-        fetchDesignCodes={fetchDesignCodes}
+        fetchDesignCodes={fetchLocalDesignCodes}
         setErrors={setErrors}
         errors={errors}
         finishings={finishings}
-        designCodes={designCodes}
+        designCodes={localDesignCodes}
         panelSizes={panelSizes}
         aSectionSizes={aSectionSizes}
         frameSizes={frameSizes}
@@ -138,7 +154,7 @@ export default function DesignPreviewCard(props: Props) {
           <div className="bg-gray-50 rounded p-1.5">
             <div className="text-xs text-gray-500 mb-0.5">Design No</div>
             <div className="text-sm font-semibold text-gray-800">
-              {getDesignCodeTitle(design.designNo) || "N/A"}
+              {getLocalDesignCodeTitle(design.designNo) || "N/A"}
             </div>
           </div>
         </div>

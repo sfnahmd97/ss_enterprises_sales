@@ -223,6 +223,7 @@ export default function DesignDetails({
                   min={0}
                   step={1}
                   value={currentDesign.nos ?? ""}
+                  onWheel={(e) => e.currentTarget.blur()}
                   onKeyDown={(e) => {
                     if (["e", "E", "+", "-", "."].includes(e.key)) e.preventDefault();
                   }}
@@ -277,6 +278,7 @@ export default function DesignDetails({
                       name={`a_section${id}`}
                       min={0}
                       step={1}
+                      onWheel={(e) => e.currentTarget.blur()}
                       value={
                         currentDesign.aSection && currentDesign.aSection[id] !== undefined
                           ? currentDesign.aSection[id]
@@ -333,6 +335,7 @@ export default function DesignDetails({
                       name={`frame${id}`}
                       min={0}
                       step={1}
+                      onWheel={(e) => e.currentTarget.blur()}
                       value={
                         currentDesign.frame && currentDesign.frame[id] !== undefined
                           ? currentDesign.frame[id]
