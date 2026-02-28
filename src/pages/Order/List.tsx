@@ -4,7 +4,7 @@ import api from "../../lib/axios";
 import type { ListApiResponse } from "../../interfaces/common";
 import Swal from "sweetalert2";
 import Pagination from "../../components/common/Pagination";
-import { ChevronLeft, Search, Filter, X } from "lucide-react";
+import { ChevronLeft, Search, Filter, X, Plus } from "lucide-react";
 import SalesManagerOrders from "./Components/SalesManagerOrders";
 import DefaultOrders from "./Components/DefaultOrders";
 import toast from "react-hot-toast";
@@ -129,8 +129,11 @@ export default function Main() {
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
       {/* Breadcrumbs */}
-      <div className="flex items-center mb-6">
-        <Link
+      
+
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+              <div>
+                <Link
           to="/dashboard"
           className="flex items-center text-gray-600 hover:text-blue-600 transition-colors font-medium"
           title="Go to Dashboard"
@@ -138,7 +141,18 @@ export default function Main() {
           <ChevronLeft className="mr-1" size={20} />
           <span>Dashboard</span>
         </Link>
-      </div>
+              </div>
+      
+              {userRole != "sales_coordinator" && (
+                <Link
+                  to="/orders/create"
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-3 rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition-all"
+                >
+                  <Plus size={20} />
+                  Add Order
+                </Link>
+              )}
+            </header>
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto">

@@ -52,7 +52,7 @@ export default function EditProfile() {
   if (!initialValues) return <p>Loading...</p>;
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       {/* breadcrumb */}
       <div className="flex justify-between items-center mb-4">
               <nav className="flex text-sm text-gray-600" aria-label="Breadcrumb">
@@ -93,7 +93,7 @@ export default function EditProfile() {
         onSubmit={handleSubmit}
       >
         {({ errors, touched }) => (
-          <Form className="max-w-md mx-auto bg-white shadow-lg rounded-xl p-6 space-y-5">
+          <Form className="max-w-md mx-auto bg-white shadow-lg rounded-xl p-4 md:p-6 space-y-5">
             <h2 className="text-xl font-bold text-gray-800">
               Edit Profile
             </h2>
@@ -142,7 +142,7 @@ export default function EditProfile() {
 
             
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 type="submit"
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

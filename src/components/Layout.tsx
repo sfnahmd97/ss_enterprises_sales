@@ -5,7 +5,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-gray-100">
       <div className="flex flex-col flex-1">
         <Header />
-        <main className="p-4 overflow-auto">{children}</main>
+        <main className="p-3 sm:p-4 overflow-auto">{children}</main>
       </div>
     </div>
   );

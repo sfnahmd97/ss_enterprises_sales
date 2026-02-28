@@ -24,12 +24,12 @@ export default function Modal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
         className={`
-          bg-white rounded-xl shadow-lg p-6 relative w-full 
+          bg-white rounded-xl shadow-lg p-4 md:p-6 relative w-full max-h-[90vh] overflow-y-auto
           ${sizeClasses[size]}
-          ${size === "full" ? "h-auto max-h-[95vh] overflow-auto" : ""}
+          ${size === "full" ? "h-auto" : ""}
         `}
       >
         {/* Close Button */}

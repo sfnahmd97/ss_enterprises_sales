@@ -174,7 +174,7 @@ export default function OrderFormEdit({
     if (!currentDesign.designNo) newErrors.designNo = true;
     if (!currentDesign.panelSize) newErrors.panelSize = true;
     if (!currentDesign.finishing) newErrors.finishing = true;
-    if (!currentDesign.nos) newErrors.nos = true;
+    // if (!currentDesign.nos) newErrors.nos = true;
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -182,6 +182,19 @@ export default function OrderFormEdit({
       return;
     }
 
+
+     const isDuplicate = savedDesigns.some((d) =>
+        Number(d.designType) === Number(currentDesign.designType) &&
+        Number(d.finishing) === Number(currentDesign.finishing) &&
+        Number(d.panelSize) === Number(currentDesign.panelSize) &&
+        Number(d.designNo) === Number(currentDesign.designNo)
+      );
+    
+      if (isDuplicate) {
+        toast.error("This design combination is already added!");
+        return;
+      }
+      
     const newDesign = { ...currentDesign, id: savedDesigns.length + 1 };
     setSavedDesigns((prev) => [...prev, newDesign]);
 

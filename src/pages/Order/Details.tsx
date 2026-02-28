@@ -166,18 +166,16 @@ const getStatusIcon = (status?: string): React.ReactElement => {
 
 // --------------------------------------------
 // Fixed column definitions with cumulative left offsets
-// Adjust widths to match your actual rendered column widths.
 // --------------------------------------------
 const FIXED_COLS = [
   { label: "#",           width: 48  },
   { label: "Design",      width: 120 },
-  { label: "Design Type", width: 140 },
+  { label: "Design Type", width: 100 }, // reduced
   { label: "Finishing",   width: 120 },
-  { label: "Panel Size",  width: 110 },
-  { label: "Panel Nos",   width: 100 },
+  { label: "Panel Size",  width: 90  }, // reduced
+  { label: "Panel Nos",   width: 80  }, // reduced
 ];
 
-// Pre-compute cumulative left values
 const fixedColMeta = FIXED_COLS.reduce<{ label: string; width: number; left: number }[]>(
   (acc, col, i) => {
     const left = i === 0 ? 0 : acc[i - 1].left + acc[i - 1].width;
@@ -256,7 +254,6 @@ const OrderDetailPage: React.FC = () => {
 
   const { order, customer, order_designs } = orderData;
 
-  // Collect all unique dynamic sizes
   const allSectionSizes = Array.from(
     new Set(order_designs.flatMap((d) => d.a_sections.map((s) => s.size)))
   );
@@ -375,18 +372,11 @@ const OrderDetailPage: React.FC = () => {
 
           <div className="p-6">
             {order_designs.length > 0 ? (
-              /**
-               * The outer wrapper is the scroll container.
-               * `overflow-x-auto` enables horizontal scrolling.
-               * The table uses `border-separate border-spacing-0` so sticky
-               * cells with borders behave correctly.
-               */
               <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
                 <table
                   className="text-sm border-separate border-spacing-0"
-                 style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}
+                  style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}
                 >
-                  {/* colgroup enforces exact widths — most reliable cross-browser approach */}
                   <colgroup>
                     {fixedColMeta.map((col) => (
                       <col key={col.label} style={{ width: col.width }} />
@@ -402,7 +392,6 @@ const OrderDetailPage: React.FC = () => {
                   <thead>
                     {/* ── Row 1: group headers ── */}
                     <tr className="bg-gray-50">
-                      {/* Fixed column headers (rowSpan=2 to span both header rows) */}
                       {fixedColMeta.map((col) => (
                         <th
                           key={col.label}
@@ -414,7 +403,6 @@ const OrderDetailPage: React.FC = () => {
                         </th>
                       ))}
 
-                      {/* A Section group header */}
                       {allSectionSizes.length > 0 && (
                         <th
                           colSpan={allSectionSizes.length}
@@ -424,7 +412,6 @@ const OrderDetailPage: React.FC = () => {
                         </th>
                       )}
 
-                      {/* Frame group header */}
                       {allFrameSizes.length > 0 && (
                         <th
                           colSpan={allFrameSizes.length}
@@ -435,7 +422,7 @@ const OrderDetailPage: React.FC = () => {
                       )}
                     </tr>
 
-                    {/* ── Row 2: size sub-headers (dynamic only) ── */}
+                    {/* ── Row 2: size sub-headers ── */}
                     <tr className="bg-gray-50">
                       {allSectionSizes.map((size, i) => (
                         <th
@@ -456,7 +443,7 @@ const OrderDetailPage: React.FC = () => {
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody>
                     {order_designs.map((design, index) => {
                       const sectionMap = Object.fromEntries(
                         design.a_sections.map((s) => [s.size, s.quantity])
@@ -468,20 +455,34 @@ const OrderDetailPage: React.FC = () => {
                       const rowValues: (string | number)[] = [
                         index + 1,
                         design.design_code || "N/A",
-                        design.design_type.title,
-                        design.finishing.title,
+                        design.design_type.short,
+                        design.finishing.short,
                         design.panel_size.size,
                         design.nos ?? "0",
                       ];
 
+                      // ✅ Alternating row colors
+                      const isEven = index % 2 === 0;
+                      const rowBg = isEven ? "bg-white" : "bg-slate-100";
+                      const stickyBg = isEven ? "bg-white" : "bg-slate-100";
+
                       return (
-                        <tr key={design.id} className="hover:bg-blue-50/30 transition-colors group">
+                        <tr
+                          key={design.id}
+                          className={`${rowBg} hover:bg-blue-50/50 transition-colors group`}
+                        >
                           {/* ── Sticky fixed cells ── */}
                           {fixedColMeta.map((col, ci) => (
                             <td
                               key={col.label}
                               style={{ left: col.left }}
-                              className={`sticky z-10 bg-white group-hover:bg-blue-50/30 px-4 py-3 whitespace-nowrap border-r border-gray-100 transition-colors ${ci === 0 ? "text-gray-400 font-medium" : ci === 1 ? "font-semibold text-gray-800" : "text-gray-700"}`}
+                              className={`sticky z-10 ${stickyBg} group-hover:bg-blue-50/50 px-4 py-3 whitespace-nowrap border-r border-gray-100 border-b border-b-gray-100 transition-colors ${
+                                ci === 0
+                                  ? "text-gray-400 font-medium"
+                                  : ci === 1
+                                  ? "font-semibold text-gray-800"
+                                  : "text-gray-700"
+                              }`}
                             >
                               {rowValues[ci]}
                             </td>
@@ -491,7 +492,9 @@ const OrderDetailPage: React.FC = () => {
                           {allSectionSizes.map((size, i) => (
                             <td
                               key={size}
-                              className={`px-3 py-3 text-center ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                              className={`px-3 py-3 text-center border-b border-b-gray-100 ${
+                                i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"
+                              }`}
                             >
                               {sectionMap[size] != null ? (
                                 <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold text-xs">
@@ -507,7 +510,9 @@ const OrderDetailPage: React.FC = () => {
                           {allFrameSizes.map((size, i) => (
                             <td
                               key={size}
-                              className={`px-3 py-3 text-center ${i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"}`}
+                              className={`px-3 py-3 text-center border-b border-b-gray-100 ${
+                                i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"
+                              }`}
                             >
                               {frameMap[size] != null ? (
                                 <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold text-xs">

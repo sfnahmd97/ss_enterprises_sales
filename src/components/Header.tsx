@@ -123,12 +123,12 @@ export default function Header() {
   return (
     <header
       // Minimal soft gradient
-      className="w-full flex items-center justify-between bg-gradient-to-r from-indigo-100 via-purple-100 to-blue-100 px-8 py-3 border-b border-gray-200 shadow-sm transition-all duration-300"
+      className="w-full flex items-center justify-between bg-gradient-to-r from-indigo-100 via-purple-100 to-blue-100 px-4 sm:px-6 lg:px-8 py-3 border-b border-gray-200 shadow-sm transition-all duration-300"
 
 
       // className="w-full flex items-center justify-between bg-white px-8 py-3 border-b border-gray-200 shadow-sm transition-all duration-300"
     >
-      <div className="flex items-center px-3 py-2 w-1/3 relative">
+      <div className="flex items-center px-2 sm:px-3 py-2 w-full sm:w-auto sm:min-w-[200px] lg:w-1/3 relative">
         <Menu
           size={24}
           className={`cursor-pointer text-gray-700 transition-transform duration-200 ${
@@ -158,14 +158,14 @@ export default function Header() {
           </div>
         )}
 
-        <h1 className="flex items-center gap-2 text-lg font-bold text-blue-900 ml-4 select-none">
+        <h1 className="flex items-center gap-2 text-base sm:text-lg font-bold text-blue-900 ml-2 sm:ml-4 select-none">
           <img
             src="/images/logo.png"
             alt="Logo"
-            className="w-10 h-10 object-contain"
+            className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
             draggable={false}
           />
-          <span className="text-gray-700">SS ENTERPRISES</span>
+          <span className="text-gray-700 truncate max-w-[120px] sm:max-w-none">SS ENTERPRISES</span>
         </h1>
       </div>
 
