@@ -170,11 +170,14 @@ const getStatusIcon = (status?: string): React.ReactElement => {
 const FIXED_COLS = [
   { label: "#",           width: 48  },
   { label: "Design",      width: 120 },
-  { label: "Design Type", width: 100 }, // reduced
+  { label: "Design Type", width: 100 },
   { label: "Finishing",   width: 120 },
-  { label: "Panel Size",  width: 90  }, // reduced
-  { label: "Panel Nos",   width: 80  }, // reduced
+  { label: "Panel Size",  width: 90  },
+  { label: "Panel Nos",   width: 80  },
 ];
+
+// Columns that should NOT wrap
+const NO_WRAP_COLS = ["#", "Design", "Finishing"];
 
 const fixedColMeta = FIXED_COLS.reduce<{ label: string; width: number; left: number }[]>(
   (acc, col, i) => {
@@ -184,6 +187,9 @@ const fixedColMeta = FIXED_COLS.reduce<{ label: string; width: number; left: num
   },
   []
 );
+
+// Row 1 header height — used to offset row 2 sticky top
+const HEADER_ROW1_HEIGHT = 37;
 
 // --------------------------------------------
 // 🟦 MAIN COMPONENT (TSX)
@@ -224,7 +230,7 @@ const OrderDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
+      <div className="min-h-full w-full bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
         <div className="text-center">
           <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600 text-lg">Loading order details...</p>
@@ -235,7 +241,7 @@ const OrderDetailPage: React.FC = () => {
 
   if (!orderData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
+      <div className="min-h-full w-full bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h2>
@@ -262,7 +268,7 @@ const OrderDetailPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
+    <div className="min-h-full w-full flex flex-col bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 md:p-6 lg:p-8">
 
       {/* Decorative Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -271,64 +277,65 @@ const OrderDetailPage: React.FC = () => {
         <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto">
+      <div className="relative max-w-7xl mx-auto w-full flex-1 flex flex-col min-w-0">
 
         {/* Breadcrumb */}
-        <div className="flex items-center mb-6">
+        <div className="flex items-center mb-4 md:mb-6">
           <button
             onClick={() => navigate("/orders/list")}
-            className="flex items-center text-gray-600 hover:text-blue-600 transition-colors font-medium group"
+            className="flex items-center gap-1 py-2 pr-2 -ml-2 text-gray-600 hover:text-blue-600 transition-colors font-medium group min-h-[44px]"
+            aria-label="Back to Orders"
           >
-            <ChevronLeft className="mr-1 group-hover:-translate-x-1 transition-transform" size={20} />
+            <ChevronLeft className="mr-1 group-hover:-translate-x-1 transition-transform flex-shrink-0" size={20} />
             <span>Back to Orders</span>
           </button>
         </div>
 
         {/* Header */}
-        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Details</h1>
-              <p className="text-lg text-gray-600">Order #{order.code}</p>
+        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 p-4 md:p-6 mb-4 md:mb-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Order Details</h1>
+              <p className="text-base md:text-lg text-gray-600">Order #{order.code}</p>
             </div>
             <span
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border-2 ${getStatusColor(order.status)}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border-2 flex-shrink-0 ${getStatusColor(order.status)}`}
             >
               {getStatusIcon(order.status)}
               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
             </span>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center flex-shrink-0">
                   <User className="w-5 h-5 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1 overflow-hidden">
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Customer</p>
-                  <p className="font-semibold text-gray-900">{customer.name}</p>
-                  <p className="text-xs text-gray-500">{customer.phone_no}</p>
+                  <p className="font-semibold text-gray-900 truncate" title={customer.name}>{customer.name}</p>
+                  <p className="text-xs text-gray-500 truncate" title={customer.phone_no}>{customer.phone_no}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-emerald-400 flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-5 h-5 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1 overflow-hidden">
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Location</p>
-                  <p className="font-semibold text-gray-900">{customer.location.location_name}</p>
-                  <p className="text-xs text-gray-500">{customer.district.name},{customer.state.name}</p>
+                  <p className="font-semibold text-gray-900 truncate" title={customer.location.location_name}>{customer.location.location_name}</p>
+                  <p className="text-xs text-gray-500 truncate" title={`${customer.district.name}, ${customer.state.name}`}>{customer.district.name}, {customer.state.name}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center flex-shrink-0">
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1 overflow-hidden">
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Order Date</p>
                   <p className="font-semibold text-gray-900">
                     {new Date(order.created_at).toLocaleDateString("en-IN", { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -339,11 +346,11 @@ const OrderDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
                   <Truck className="w-5 h-5 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1 overflow-hidden">
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Delivery Date</p>
                   <p className="font-semibold text-gray-900">
                     {new Date(order.delivery_date).toLocaleDateString("en-IN", { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -357,22 +364,31 @@ const OrderDetailPage: React.FC = () => {
         </div>
 
         {/* Order Designs Table */}
-        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Package className="w-5 h-5" />
-                Order Designs
+        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 overflow-hidden flex-1 flex flex-col">
+          <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-4 md:px-6 py-3 md:py-4 flex-shrink-0">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2 min-w-0">
+                <Package className="w-5 h-5 flex-shrink-0" />
+                <span className="truncate">Order Designs</span>
               </h2>
-              <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-semibold">
+              <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-semibold flex-shrink-0">
                 {order_designs.length} {order_designs.length === 1 ? 'Design' : 'Designs'}
               </span>
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 md:p-6 flex-1">
             {order_designs.length > 0 ? (
-              <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+              /*
+               * KEY FIX:
+               * 1. overflow-auto (both axes) enables the scroll container sticky needs
+               * 2. max-h-[60vh] gives a bounded height so vertical scroll actually occurs
+               * 3. touch-pan-x retained for tablet horizontal scroll
+               */
+              <div
+                className="overflow-auto rounded-xl border border-gray-200 shadow-sm touch-pan-x"
+                style={{ maxHeight: "60vh" }}
+              >
                 <table
                   className="text-sm border-separate border-spacing-0"
                   style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}
@@ -396,8 +412,18 @@ const OrderDetailPage: React.FC = () => {
                         <th
                           key={col.label}
                           rowSpan={2}
-                          style={{ left: col.left }}
-                          className="sticky bg-gray-50 z-20 text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap border-b-2 border-b-gray-200 border-r border-r-gray-200 align-middle"
+                          /*
+                           * FIX: both `left` (horizontal freeze) and `top: 0`
+                           * (vertical freeze) are required. z-30 keeps these
+                           * corner cells above both scrolling header cells (z-20)
+                           * and scrolling body cells (z-10).
+                           */
+                          style={{ left: col.left, top: 0 }}
+                          className={`sticky bg-gray-50 z-30 text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b-2 border-b-gray-200 border-r border-r-gray-200 align-middle ${
+                            NO_WRAP_COLS.includes(col.label)
+                              ? "whitespace-nowrap"
+                              : "whitespace-normal break-words"
+                          }`}
                         >
                           {col.label}
                         </th>
@@ -406,7 +432,12 @@ const OrderDetailPage: React.FC = () => {
                       {allSectionSizes.length > 0 && (
                         <th
                           colSpan={allSectionSizes.length}
-                          className="text-center px-4 py-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider border-b border-b-indigo-200 border-l border-l-gray-200 bg-indigo-50/60"
+                          /*
+                           * FIX: sticky + top:0 freezes this group header row
+                           * vertically. z-20 sits below the corner fixed cells.
+                           */
+                          style={{ top: 0 }}
+                          className="sticky z-20 text-center px-4 py-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider border-b border-b-indigo-200 border-l border-l-gray-200 bg-indigo-50/60"
                         >
                           A Section
                         </th>
@@ -415,7 +446,8 @@ const OrderDetailPage: React.FC = () => {
                       {allFrameSizes.length > 0 && (
                         <th
                           colSpan={allFrameSizes.length}
-                          className="text-center px-4 py-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider border-b border-b-emerald-200 border-l border-l-gray-200 bg-emerald-50/60"
+                          style={{ top: 0 }}
+                          className="sticky z-20 text-center px-4 py-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider border-b border-b-emerald-200 border-l border-l-gray-200 bg-emerald-50/60"
                         >
                           Frame
                         </th>
@@ -427,7 +459,14 @@ const OrderDetailPage: React.FC = () => {
                       {allSectionSizes.map((size, i) => (
                         <th
                           key={size}
-                          className={`px-3 py-2 text-center text-xs font-medium text-indigo-500 bg-indigo-50/40 border-b-2 border-b-gray-200 whitespace-nowrap overflow-hidden text-ellipsis ${i === 0 ? "border-l border-l-gray-200" : "border-l border-l-gray-100"}`}
+                          /*
+                           * FIX: top offset equals row-1 height so this row sticks
+                           * directly below row 1 during vertical scroll.
+                           */
+                          style={{ top: HEADER_ROW1_HEIGHT }}
+                          className={`sticky z-20 px-3 py-2 text-center text-xs font-medium text-indigo-500 bg-indigo-50/40 border-b-2 border-b-gray-200 whitespace-nowrap overflow-hidden text-ellipsis ${
+                            i === 0 ? "border-l border-l-gray-200" : "border-l border-l-gray-100"
+                          }`}
                         >
                           {size}
                         </th>
@@ -435,7 +474,10 @@ const OrderDetailPage: React.FC = () => {
                       {allFrameSizes.map((size, i) => (
                         <th
                           key={size}
-                          className={`px-3 py-2 text-center text-xs font-medium text-emerald-500 bg-emerald-50/40 border-b-2 border-b-gray-200 whitespace-nowrap overflow-hidden text-ellipsis ${i === 0 ? "border-l border-l-gray-200" : "border-l border-l-gray-100"}`}
+                          style={{ top: HEADER_ROW1_HEIGHT }}
+                          className={`sticky z-20 px-3 py-2 text-center text-xs font-medium text-emerald-500 bg-emerald-50/40 border-b-2 border-b-gray-200 whitespace-nowrap overflow-hidden text-ellipsis ${
+                            i === 0 ? "border-l border-l-gray-200" : "border-l border-l-gray-100"
+                          }`}
                         >
                           {size}
                         </th>
@@ -461,7 +503,6 @@ const OrderDetailPage: React.FC = () => {
                         design.nos ?? "0",
                       ];
 
-                      // ✅ Alternating row colors
                       const isEven = index % 2 === 0;
                       const rowBg = isEven ? "bg-white" : "bg-slate-100";
                       const stickyBg = isEven ? "bg-white" : "bg-slate-100";
@@ -476,12 +517,14 @@ const OrderDetailPage: React.FC = () => {
                             <td
                               key={col.label}
                               style={{ left: col.left }}
-                              className={`sticky z-10 ${stickyBg} group-hover:bg-blue-50/50 px-4 py-3 whitespace-nowrap border-r border-gray-100 border-b border-b-gray-100 transition-colors ${
+                              className={`sticky z-10 ${stickyBg} group-hover:bg-blue-50/50 px-4 py-3 border-r border-gray-100 border-b border-b-gray-100 transition-colors ${
                                 ci === 0
-                                  ? "text-gray-400 font-medium"
+                                  ? "text-gray-400 font-medium whitespace-nowrap"
                                   : ci === 1
-                                  ? "font-semibold text-gray-800"
-                                  : "text-gray-700"
+                                  ? "font-semibold text-gray-800 whitespace-nowrap"
+                                  : ci === 3
+                                  ? "text-gray-700 whitespace-nowrap"
+                                  : "text-gray-700 whitespace-normal break-words"
                               }`}
                             >
                               {rowValues[ci]}
@@ -496,7 +539,7 @@ const OrderDetailPage: React.FC = () => {
                                 i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"
                               }`}
                             >
-                              {sectionMap[size] != null ? (
+                              {sectionMap[size] > 0 ? (
                                 <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold text-xs">
                                   {sectionMap[size]}
                                 </span>
@@ -514,7 +557,7 @@ const OrderDetailPage: React.FC = () => {
                                 i === 0 ? "border-l border-gray-200" : "border-l border-gray-100"
                               }`}
                             >
-                              {frameMap[size] != null ? (
+                              {frameMap[size] > 0 ? (
                                 <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold text-xs">
                                   {frameMap[size]}
                                 </span>
@@ -552,23 +595,29 @@ const OrderDetailPage: React.FC = () => {
         .animation-delay-4000 { animation-delay: 4s; }
 
         /* Custom thin scrollbar */
-        .overflow-x-auto::-webkit-scrollbar {
+        .overflow-auto::-webkit-scrollbar {
           height: 4px;
+          width: 4px;
         }
-        .overflow-x-auto::-webkit-scrollbar-track {
+        .overflow-auto::-webkit-scrollbar-track {
           background: transparent;
         }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
+        .overflow-auto::-webkit-scrollbar-thumb {
           background: #cbd5e1;
           border-radius: 999px;
         }
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        .overflow-auto::-webkit-scrollbar-thumb:hover {
           background: #94a3b8;
         }
         /* Firefox */
-        .overflow-x-auto {
+        .overflow-auto {
           scrollbar-width: thin;
           scrollbar-color: #cbd5e1 transparent;
+        }
+        /* Smooth touch scrolling on tablets */
+        .touch-pan-x {
+          -webkit-overflow-scrolling: touch;
+          touch-action: pan-x pan-y;
         }
       `}</style>
     </div>

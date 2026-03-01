@@ -51,10 +51,16 @@ function QuantityInput({
   const decrement = () => onChange(Math.max(0, current - 5));
 
   return (
-    <div className="flex flex-col gap-1">
-      <label className={`text-xs font-semibold text-center ${error ? "text-red-500" : "text-gray-700"}`}>
+    <div className="relative mt-3">
+      {/* floating label */}
+      <label
+        className={`absolute left-3 -top-2.5 bg-white px-1 text-xs z-10 ${
+          error ? "text-red-500" : "text-gray-600"
+        }`}
+      >
         {label} {error && <span className="text-red-500">*</span>}
       </label>
+
       <div
         className={`flex items-center border rounded-md ${
           error ? "border-red-500" : "border-gray-300"
@@ -69,6 +75,7 @@ function QuantityInput({
           −
         </button>
 
+        {/* number input — native spinners hidden */}
         <input
           type="number"
           name={name}
@@ -139,14 +146,6 @@ export default function DesignDetails({
     menu: (base: any) => ({ ...base, zIndex: 9999 }),
   };
 
-  const errorSelectStyles = (hasError?: boolean) => ({
-    ...selectStyles,
-    control: (base: any, state: any) => ({
-      ...selectStyles.control(base, state),
-      borderColor: hasError ? "#ef4444" : state.isFocused ? "#3b82f6" : "#d1d5db",
-    }),
-  });
-
   return (
     <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
       <div className="flex items-center gap-2 mb-6">
@@ -158,12 +157,8 @@ export default function DesignDetails({
 
       {/* Design Type, Finishing, Panel Size, Design No */}
       <div className="grid grid-cols-4 gap-4 mb-4">
-
         {/* DESIGN TYPE */}
-        <div className="flex flex-col gap-1">
-          <label className={`text-sm font-semibold ${errors.designType ? "text-red-500" : "text-gray-700"}`}>
-            Design Type {errors.designType && <span className="text-red-500">*</span>}
-          </label>
+        <div className="relative">
           <Select
             options={designTypes}
             value={findOptionByValue(designTypes, currentDesign.designType)}
@@ -176,15 +171,19 @@ export default function DesignDetails({
             placeholder="Select Type"
             isClearable
             className="w-full"
-            styles={errorSelectStyles(errors.designType)}
+            styles={selectStyles}
           />
+          <label
+            className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
+              errors.designType ? "text-red-500" : "text-gray-600"
+            }`}
+          >
+            Design Type {errors.designType && <span className="text-red-500">*</span>}
+          </label>
         </div>
 
         {/* FINISHING */}
-        <div className="flex flex-col gap-1">
-          <label className={`text-sm font-semibold ${errors.finishing ? "text-red-500" : "text-gray-700"}`}>
-            Finishing {errors.finishing && <span className="text-red-500">*</span>}
-          </label>
+        <div className="relative">
           <Select
             options={finishings}
             value={findOptionByValue(finishings, currentDesign.finishing)}
@@ -197,15 +196,19 @@ export default function DesignDetails({
             placeholder="Select Finishing"
             isClearable
             className="w-full"
-            styles={errorSelectStyles(errors.finishing)}
+            styles={selectStyles}
           />
+          <label
+            className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
+              errors.finishing ? "text-red-500" : "text-gray-600"
+            }`}
+          >
+            Finishing {errors.finishing && <span className="text-red-500">*</span>}
+          </label>
         </div>
 
         {/* PANEL SIZE */}
-        <div className="flex flex-col gap-1">
-          <label className={`text-sm font-semibold ${errors.panelSize ? "text-red-500" : "text-gray-700"}`}>
-            Panel Size {errors.panelSize && <span className="text-red-500">*</span>}
-          </label>
+        <div className="relative">
           <Select
             options={panelSizes}
             value={findOptionByValue(panelSizes, currentDesign.panelSize)}
@@ -217,15 +220,19 @@ export default function DesignDetails({
             placeholder="Select Panel Size"
             isClearable
             className="w-full"
-            styles={errorSelectStyles(errors.panelSize)}
+            styles={selectStyles}
           />
+          <label
+            className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
+              errors.panelSize ? "text-red-500" : "text-gray-600"
+            }`}
+          >
+            Panel Size {errors.panelSize && <span className="text-red-500">*</span>}
+          </label>
         </div>
 
         {/* DESIGN NO */}
-        <div className="flex flex-col gap-1">
-          <label className={`text-sm font-semibold ${errors.designNo ? "text-red-500" : "text-gray-700"}`}>
-            Design No. {errors.designNo && <span className="text-red-500">*</span>}
-          </label>
+        <div className="relative">
           <Select
             options={designCodes}
             value={findOptionByValue(designCodes, currentDesign.designNo)}
@@ -237,17 +244,23 @@ export default function DesignDetails({
             placeholder="Select Design"
             isClearable
             className="w-full"
-            styles={errorSelectStyles(errors.designNo)}
+            styles={selectStyles}
           />
+          <label
+            className={`absolute left-3 -top-2.5 bg-white px-1 text-sm ${
+              errors.designNo ? "text-red-500" : "text-gray-600"
+            }`}
+          >
+            Design No. {errors.designNo && <span className="text-red-500">*</span>}
+          </label>
         </div>
-
       </div>
 
       {/* Panel / Nos */}
       <div className="mb-6">
-        <div className="p-4">
+        <div className="relative p-4">
           <div className="flex items-center gap-4">
-            <label className="w-28 text-sm font-semibold text-center text-gray-700">Panel :</label>
+            <label className="w-28 text-sm text-gray-600">Panel :</label>
             <div className="grid grid-cols-2 gap-4 w-full">
               <QuantityInput
                 label="Nos"
@@ -266,9 +279,9 @@ export default function DesignDetails({
 
       {/* A Section */}
       <div className="mb-6">
-        <div className="p-4">
+        <div className="relative p-4">
           <div className="flex items-center gap-4">
-            <label className="w-28 text-sm font-semibold text-center text-gray-700">A section :</label>
+            <label className="w-28 text-sm text-gray-600">A section :</label>
             <div
               className="grid gap-4 w-full"
               style={{
@@ -306,9 +319,9 @@ export default function DesignDetails({
 
       {/* Frame */}
       <div className="mb-6">
-        <div className="p-4">
+        <div className="relative p-4">
           <div className="flex items-center gap-4">
-            <label className="w-28 text-sm font-semibold text-center text-gray-700">Frame :</label>
+            <label className="w-28 text-sm text-gray-600">Frame :</label>
             <div
               className="grid gap-4 w-full"
               style={{

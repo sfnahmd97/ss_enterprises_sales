@@ -72,7 +72,7 @@ export default function DesignPreviewCard(props: Props) {
   if (isEditing) {
     return (
       <DesignDetails
-        savedDesigns={[]} // unused here
+        savedDesigns={Array(design.id - 1).fill(null)} // unused here
         designTypes={designTypes}
         currentDesign={editData}
         setCurrentDesign={setEditData}
