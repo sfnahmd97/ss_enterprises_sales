@@ -222,6 +222,36 @@ const OrderDetailPage: React.FC = () => {
     }
   };
 
+  const downloadExcel = async () => {
+  try {
+    const response = await api.get(
+      `/sales/order/export-order-details/${id}`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    const blob = new Blob([response.data as BlobPart], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `order_${order?.code}.xlsx`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error("Export failed", error);
+  }
+};
+
   useEffect(() => {
     if (id) {
       fetchOrderDetails();
@@ -294,17 +324,36 @@ const OrderDetailPage: React.FC = () => {
         {/* Header */}
         <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-white/20 p-4 md:p-6 mb-4 md:mb-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Order Details</h1>
-              <p className="text-base md:text-lg text-gray-600">Order #{order.code}</p>
-            </div>
-            <span
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border-2 flex-shrink-0 ${getStatusColor(order.status)}`}
-            >
-              {getStatusIcon(order.status)}
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-            </span>
-          </div>
+  
+  <div className="min-w-0 flex-1">
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+      Order Details
+    </h1>
+    <p className="text-base md:text-lg text-gray-600">
+      Order #{order.code}
+    </p>
+  </div>
+
+  <div className="flex items-center gap-3">
+
+    {/* Export Button */}
+    <button
+      onClick={downloadExcel}
+      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+    >
+      <Package className="w-4 h-4" />
+      Export Excel
+    </button>
+
+    <span
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border-2 ${getStatusColor(order.status)}`}
+    >
+      {getStatusIcon(order.status)}
+      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+    </span>
+
+  </div>
+</div>
 
           <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
